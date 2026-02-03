@@ -2,19 +2,21 @@ const express = require('express');
 const app = express();
 
 
-// Home route
-app.get("/", (req, res) => {
-    res.send("Welcome to the home page");
+const {adminAuth,userAuth} = require("./middlewares/auth");
+app.use("/admin", adminAuth);
+
+app.get("/user", userAuth, (req, res) => {
+    res.send("User data");
 });
 
-// Hello route
-app.get("/hello", (req, res) => {
-    res.send("Hello from /hello route");
+app.get("/admin/getalldata", adminAuth, (req, res) => {
+    res.send("All admin data");
 });
-
-// Test route
-app.get("/test", (req, res) => {
-    res.send("Hello World");
+app.get("/admin/deletedata", adminAuth, (req, res) => {
+    res.send("Admin deleted data");
+});
+app.get("/user", (req, res)=> {
+    res.send("User route handler");
 });
 
 app.listen(4000, () => {
