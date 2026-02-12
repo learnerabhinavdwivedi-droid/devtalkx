@@ -4,9 +4,9 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const http = require("http");
+const path = require("path");
 
-
-require("dotenv").config();
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 console.log("Razorpay Key ID:", process.env.RAZORPAY_KEY_ID);
 
 
