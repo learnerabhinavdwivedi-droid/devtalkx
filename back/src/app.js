@@ -4,11 +4,10 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const http = require("http");
+const { loadedPath } = require("./config/env");
 
-
-require("dotenv").config();
-console.log("Razorpay Key ID:", process.env.RAZORPAY_KEY_ID);
-
+console.log("Environment loaded from:", loadedPath || "default dotenv resolution");
+console.log("Razorpay Key ID configured:", Boolean(process.env.RAZORPAY_KEY_ID));
 
 require("./utils/cronjob");
 
@@ -47,5 +46,6 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.error("Database cannot be connected!!");
+    
+    console.error("Database cannot be connected!!", err.message);
   });
