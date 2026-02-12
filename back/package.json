@@ -1,0 +1,36 @@
+{
+  "name": "devtinder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akshaymarch7/devTinder.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/akshaymarch7/devTinder/issues"
+  },
+  "homepage": "https://github.com/akshaymarch7/devTinder#readme",
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.988.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.2.1",
+    "node-cron": "^4.2.1",
+    "razorpay": "^2.9.6",
+    "socket.io": "^4.8.3",
+    "validator": "^13.15.26"
+  }
+}
