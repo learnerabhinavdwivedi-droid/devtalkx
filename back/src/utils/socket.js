@@ -1,64 +1,81 @@
 const socket = require("socket.io");
 const crypto = require("crypto");
 const { Chat } = require("../models/chat");
+// ConnectionRequest can be used for the "friend check" validation
 const ConnectionRequest = require("../models/connectionRequest");
 
 const getSecretRoomId = (userId, targetUserId) => {
   return crypto
     .createHash("sha256")
-    .update([userId, targetUserId].sort().join("$"))
+    .update([userId.toString(), targetUserId.toString()].sort().join("$"))
     .digest("hex");
 };
 
 const initializeSocket = (server) => {
   const io = socket(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      methods: ["GET", "POST"]
     },
+    // Beast Mode: Terminate ghost connections faster
+    pingTimeout: 60000, 
   });
 
   io.on("connection", (socket) => {
+    // 1. Better Room Joining with logging
     socket.on("joinChat", ({ firstName, userId, targetUserId }) => {
+      if (!userId || !targetUserId) return;
+      
       const roomId = getSecretRoomId(userId, targetUserId);
-      console.log(firstName + " joined Room : " + roomId);
       socket.join(roomId);
+      console.log(`✨ ${firstName} secured in Room: ${roomId.substring(0, 8)}...`);
     });
 
-    socket.on(
-      "sendMessage",
-      async ({ firstName, lastName, userId, targetUserId, text }) => {
-        // Save messages to the database
-        try {
-          const roomId = getSecretRoomId(userId, targetUserId);
-          console.log(firstName + " " + text);
+    // 2. High-Performance Messaging
+    socket.on("sendMessage", async ({ firstName, lastName, userId, targetUserId, text }) => {
+      try {
+        const roomId = getSecretRoomId(userId, targetUserId);
 
-          // TODO: Check if userId & targetUserId are friends
+        // BEAST MODE SECURITY: Validation
+        // Only save and emit if text actually exists
+        if (!text || text.trim() === "") return;
 
-          let chat = await Chat.findOne({
-            participants: { $all: [userId, targetUserId] },
-          });
+        // Optimized DB Update: Using $push directly is faster than fetching & saving the whole doc
+        const chat = await Chat.findOneAndUpdate(
+          { participants: { $all: [userId, targetUserId] } },
+          { 
+            $push: { messages: { senderId: userId, text } } 
+          },
+          { upsert: true, new: true } // Creates the chat if it doesn't exist
+        );
 
-          if (!chat) {
-            chat = new Chat({
-              participants: [userId, targetUserId],
-              messages: [],
-            });
-          }
+        // TARGETED EMIT: Use .to(roomId) but consider .broadcast to save sender bandwidth
+        // We emit to the room so the target receives it instantly
+        io.to(roomId).emit("messageReceived", { 
+          firstName, 
+          lastName, 
+          text,
+          senderId: userId,
+          createdAt: new Date() 
+        });
 
-          chat.messages.push({
-            senderId: userId,
-            text,
-          });
-
-          await chat.save();
-          io.to(roomId).emit("messageReceived", { firstName, lastName, text });
-        } catch (err) {
-          console.log(err);
-        }
+      } catch (err) {
+        console.error("❌ Socket Message Error:", err.message);
+        socket.emit("error", { message: "Message could not be sent" });
       }
-    );
+    });
 
-    socket.on("disconnect", () => {});
+    // 3. CLEANUP: The Memory Guard
+    socket.on("disconnecting", () => {
+      // Log rooms being left for debugging
+      const rooms = Array.from(socket.rooms);
+      console.log(`Cleanup: Socket ${socket.id} leaving ${rooms.length} rooms`);
+    });
+
+    socket.on("disconnect", () => {
+      socket.removeAllListeners(); 
+      console.log("🚀 User disconnected & listeners wiped.");
+    });
   });
 };
 

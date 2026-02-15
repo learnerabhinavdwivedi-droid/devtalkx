@@ -10,9 +10,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       minLength: 4,
       maxLength: 50,
+      trim: true,
     },
     lastName: {
       type: String,
+      trim: true,
     },
     emailId: {
       type: String,
@@ -31,7 +33,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       validate(value) {
         if (!validator.isStrongPassword(value)) {
-          throw new Error("Enter a Strong Password: " + value);
+          throw new Error("Password must be stronger (Min 8 chars, 1 Uppercase, 1 Symbol)");
         }
       },
     },
@@ -45,61 +47,80 @@ const userSchema = new mongoose.Schema(
         values: ["male", "female", "other"],
         message: `{VALUE} is not a valid gender type`,
       },
-      // validate(value) {
-      //   if (!["male", "female", "others"].includes(value)) {
-      //     throw new Error("Gender data is not valid");
-      //   }
-      // },
     },
+    // --- PREMIUM FEATURES ---
     isPremium: {
       type: Boolean,
       default: false,
     },
     membershipType: {
       type: String,
+      enum: ["Free", "Silver", "Gold"],
+      default: "Free",
     },
+    // --- DEV-MATCH THEME FIELDS ---
     photoUrl: {
       type: String,
-      default: "https://geographyandyou.com/images/user-profile.png",
+      default: "https://avatar.iran.liara.run/public/coding", // More aesthetic default
       validate(value) {
         if (!validator.isURL(value)) {
           throw new Error("Invalid Photo URL: " + value);
         }
       },
     },
-    about: {
+    bio: {
       type: String,
-      default: "This is a default about of the user!",
+      maxLength: 200,
+      default: "Hello World! I am a developer.",
     },
     skills: {
       type: [String],
+      default: [],
+    },
+    devRole: { 
+      type: String, 
+      enum: ["Frontend", "Backend", "Fullstack", "DevOps", "AI/ML"] 
+    },
+    projectLink: { 
+      type: String,
+      validate(value) {
+        if (value && !validator.isURL(value)) {
+          throw new Error("Invalid Project URL");
+        }
+      }
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-userSchema.methods.getJWT = async function () {
+// --- BEAST MODE: AUTO-HASH PASSWORD ---
+// Runs automatically before every .save() call
+userSchema.pre("save", async function () {
   const user = this;
 
-  const token = await jwt.sign({ _id: user._id }, "DEV@Tinder$790", {
-    expiresIn: "7d",
-  });
+  // Only hash the password if it has been modified (or is new)
+  if (!user.isModified("password")) return;
 
+  // Hash the password with a salt round of 10
+  user.password = await bcrypt.hash(user.password, 10);
+});
+
+// --- HELPER METHODS ---
+
+// Generate JWT for Auth
+userSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = await jwt.sign(
+    { _id: user._id }, 
+    process.env.JWT_SECRET || "DEV@Tinder$790", 
+    { expiresIn: "7d" }
+  );
   return token;
 };
 
+// Validate Password during Login
 userSchema.methods.validatePassword = async function (passwordInputByUser) {
-  const user = this;
-  const passwordHash = user.password;
-
-  const isPasswordValid = await bcrypt.compare(
-    passwordInputByUser,
-    passwordHash
-  );
-
-  return isPasswordValid;
+  return await bcrypt.compare(passwordInputByUser, this.password);
 };
 
 module.exports = mongoose.model("User", userSchema);

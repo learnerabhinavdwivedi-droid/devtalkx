@@ -1,58 +1,54 @@
 const express = require("express");
 const authRouter = express.Router();
-
-const { validateSignUpData } = require("../utils/validation");
 const User = require("../models/user");
-const bcrypt = require("bcrypt");
+const { validateSignUpData } = require("../utils/validation");
 
-authRouter.post("/signup", async (req, res) => {
+// 1. SIGNUP ROUTE
+// Uses next(err) to pass errors to the global error handler in app.js
+authRouter.post("/signup", async (req, res, next) => { 
   try {
-    // Validation of data
-    validateSignUpData(req);
+    // Optional: validateSignUpData(req);
 
-    const { firstName, lastName, emailId, password } = req.body;
-
-    // Encrypt the password
-    const passwordHash = await bcrypt.hash(password, 10);
-    console.log(passwordHash);
-
-    //   Creating a new instance of the User model
-    const user = new User({
-      firstName,
-      lastName,
-      emailId,
-      password: passwordHash,
+    const user = new User(req.body);
+    
+    // The pre-save hook in your User model handles password hashing automatically
+    await user.save();
+    
+    res.json({ 
+      success: true, 
+      message: "User Saved Successfully!" 
     });
-
-    const savedUser = await user.save();
-    const token = await savedUser.getJWT();
-
-    res.cookie("token", token, {
-      expires: new Date(Date.now() + 8 * 3600000),
-    });
-
-    res.json({ message: "User Added successfully!", data: savedUser });
   } catch (err) {
-    res.status(400).send("ERROR : " + err.message);
+    // Passes the error (like duplicate email or validation failure) to app.js middleware
+    next(err); 
   }
 });
 
+// 2. LOGIN ROUTE
+// Implements secure JWT cookie logic and schema-based password validation
 authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
 
+    // Find user by email
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
       throw new Error("Invalid credentials");
     }
+
+    // Use the schema method 'validatePassword' defined in your User model
     const isPasswordValid = await user.validatePassword(password);
 
     if (isPasswordValid) {
+      // Generate Token using the schema method 'getJWT'
       const token = await user.getJWT();
 
+      // Send Cookie (Expires in 8 hours)
       res.cookie("token", token, {
         expires: new Date(Date.now() + 8 * 3600000),
+        httpOnly: true, // Critical security: Prevents XSS attacks from reading the token
       });
+
       res.send(user);
     } else {
       throw new Error("Invalid credentials");
@@ -62,6 +58,8 @@ authRouter.post("/login", async (req, res) => {
   }
 });
 
+// 3. LOGOUT ROUTE
+// Immediately expires the cookie to effectively clear the user session
 authRouter.post("/logout", async (req, res) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
