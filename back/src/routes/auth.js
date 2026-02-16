@@ -3,53 +3,56 @@ const authRouter = express.Router();
 const User = require("../models/user");
 const { validateSignUpData } = require("../utils/validation");
 
-// 1. SIGNUP ROUTE
-// Uses next(err) to pass errors to the global error handler in app.js
+// --- 1. SIGNUP ROUTE ---
+// 🚀 Handles new developer registration with automatic password hashing via model hooks
 authRouter.post("/signup", async (req, res, next) => { 
   try {
-    // Optional: validateSignUpData(req);
+    // 🛠️ Step 1: Validate incoming data
+    validateSignUpData(req);
 
     const user = new User(req.body);
     
-    // The pre-save hook in your User model handles password hashing automatically
+    // 🛠️ Step 2: Save user (User model 'pre-save' hook hashes the password)
     await user.save();
     
     res.json({ 
       success: true, 
-      message: "User Saved Successfully!" 
+      message: "Developer Profile Created Successfully! 🚀" 
     });
   } catch (err) {
-    // Passes the error (like duplicate email or validation failure) to app.js middleware
+    // 🛠️ Step 3: Pass to global error handler in app.js
     next(err); 
   }
 });
 
-// 2. LOGIN ROUTE
-// Implements secure JWT cookie logic and schema-based password validation
+// --- 2. LOGIN ROUTE ---
+// 🚀 Implements secure JWT cookie logic for session management
 authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
 
-    // Find user by email
+    // 🔍 Find user by email
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
       throw new Error("Invalid credentials");
     }
 
-    // Use the schema method 'validatePassword' defined in your User model
+    // 🛡️ Validate password using schema method
     const isPasswordValid = await user.validatePassword(password);
 
     if (isPasswordValid) {
-      // Generate Token using the schema method 'getJWT'
+      // 🎟️ Generate Token using schema method
       const token = await user.getJWT();
 
-      // Send Cookie (Expires in 8 hours)
+      // 🍪 Send Cookie (8-hour expiration)
       res.cookie("token", token, {
         expires: new Date(Date.now() + 8 * 3600000),
-        httpOnly: true, // Critical security: Prevents XSS attacks from reading the token
+        httpOnly: true, // 🚀 Security: Protects against XSS token theft
+        secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
+        sameSite: "strict",
       });
 
-      res.send(user);
+      res.send(user); // Send user object back to frontend store
     } else {
       throw new Error("Invalid credentials");
     }
@@ -58,13 +61,14 @@ authRouter.post("/login", async (req, res) => {
   }
 });
 
-// 3. LOGOUT ROUTE
-// Immediately expires the cookie to effectively clear the user session
+// --- 3. LOGOUT ROUTE ---
+// 🚀 Destroys the session by expiring the cookie immediately
 authRouter.post("/logout", async (req, res) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
+    httpOnly: true,
   });
-  res.send("Logout Successful!!");
+  res.send("Logout Successful!! 🔌");
 });
 
 module.exports = authRouter;

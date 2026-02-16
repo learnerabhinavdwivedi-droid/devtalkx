@@ -48,7 +48,6 @@ const userSchema = new mongoose.Schema(
         message: `{VALUE} is not a valid gender type`,
       },
     },
-    // --- PREMIUM FEATURES ---
     isPremium: {
       type: Boolean,
       default: false,
@@ -58,10 +57,9 @@ const userSchema = new mongoose.Schema(
       enum: ["Free", "Silver", "Gold"],
       default: "Free",
     },
-    // --- DEV-MATCH THEME FIELDS ---
     photoUrl: {
       type: String,
-      default: "https://avatar.iran.liara.run/public/coding", // More aesthetic default
+      default: "https://avatar.iran.liara.run/public/coding",
       validate(value) {
         if (!validator.isURL(value)) {
           throw new Error("Invalid Photo URL: " + value);
@@ -93,8 +91,8 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// --- BEAST MODE: AUTO-HASH PASSWORD ---
-// Runs automatically before every .save() call
+// ✅ CORRECT: Beast Mode Fix (No 'next' parameter or call)
+// This runs automatically before every .save() call
 userSchema.pre("save", async function () {
   const user = this;
 
@@ -103,6 +101,8 @@ userSchema.pre("save", async function () {
 
   // Hash the password with a salt round of 10
   user.password = await bcrypt.hash(user.password, 10);
+  
+  // No next() call is needed for async functions in modern Mongoose
 });
 
 // --- HELPER METHODS ---

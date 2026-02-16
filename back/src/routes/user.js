@@ -56,21 +56,21 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
   }
 });
 
-// --- 4. MUTUAL CONNECTIONS ---
+// --- 4. MUTUAL CONNECTIONS (MATCHES) ---
 // List of all accepted matches
 userRouter.get("/user/connections", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
+    // Logic: Find accepted requests where I am either the sender or receiver
     const connectionRequests = await ConnectionRequest.find({
       $or: [
         { toUserId: loggedInUser._id, status: "accepted" },
         { fromUserId: loggedInUser._id, status: "accepted" },
       ],
-    })
-      .populate("fromUserId", USER_SAFE_DATA)
-      .populate("toUserId", USER_SAFE_DATA);
+    }).populate("fromUserId toUserId", USER_SAFE_DATA);
 
+    // Clean the data: If I am 'fromUserId', return 'toUserId' (the other person)
     const data = connectionRequests.map((row) => {
       if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
         return row.toUserId;
@@ -85,18 +85,18 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 });
 
 // --- 5. DEV-MATCH FEED ---
-// Discovery logic with pagination and interaction filtering
+// Discovery logic with interaction filtering
 userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
-    // Handle Pagination
+    // Pagination Logic
     const page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     limit = limit > 50 ? 50 : limit;
     const skip = (page - 1) * limit;
 
-    // Find all users already interacted with
+    // Find interactions to hide
     const connectionRequests = await ConnectionRequest.find({
       $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
     }).select("fromUserId toUserId");
@@ -107,10 +107,9 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       hideUsersFromFeed.add(req.toUserId.toString());
     });
     
-    // Always hide yourself
     hideUsersFromFeed.add(loggedInUser._id.toString());
 
-    // Fetch new developers not in the hide set
+    // Fetch new developers using the $nin (not in) operator
     const users = await User.find({
       _id: { $nin: Array.from(hideUsersFromFeed) }
     })

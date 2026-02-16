@@ -4,24 +4,30 @@ const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 
-// --- SWIPE ENDPOINT (The Tinder Logic) ---
+// --- 1. SWIPE ENDPOINT (The Tinder Logic) ---
 requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res) => {
   try {
     const fromUserId = req.user._id;
     const toUserId = req.params.toUserId;
     const status = req.params.status;
 
-    // 1. BEAST MODE GUARD: Can't match with yourself
+    // BEAST MODE GUARD: Prevent self-pairing
     if (fromUserId.toString() === toUserId.toString()) {
-      return res.status(400).json({ success: false, message: "Self-pairing is disabled in this IDE!" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Self-pairing is disabled in this IDE!" 
+      });
     }
 
     const allowedStatus = ["ignored", "interested"];
     if (!allowedStatus.includes(status)) {
-      return res.status(400).json({ success: false, message: "Invalid status: " + status });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid status: " + status 
+      });
     }
 
-    // 2. Existence & Duplication Check
+    // Existence & Duplication Check
     const toUser = await User.findById(toUserId);
     if (!toUser) return res.status(404).json({ success: false, message: "User not found." });
 
@@ -33,11 +39,14 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
     });
 
     if (existingRequest) {
-      return res.status(400).json({ success: false, message: "Already in the connection pipeline." });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Already in the connection pipeline." 
+      });
     }
 
-    // 3. THE INSTANT MATCH ENGINE
-    // If I'm interested, check if they already 'interested' me
+    // --- 🚀 THE INSTANT MATCH ENGINE ---
+    // If you swipe right on someone who already swiped right on you, match instantly
     if (status === "interested") {
       const mutualInterest = await ConnectionRequest.findOne({
         fromUserId: toUserId,
@@ -45,12 +54,20 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
         status: "interested",
       });
 
-      // If they already swiped right on me, convert this to an INSTANT match
       if (mutualInterest) {
         mutualInterest.status = "accepted";
         await mutualInterest.save();
+
+        // 🚀 BEAST MODE: Real-time Notification via Socket.io
+        const io = req.app.get("socketio"); 
+        if (io) {
+          io.to(toUserId.toString()).emit("match_alert", {
+            message: `🚀 It's a match! You are now connected with ${req.user.firstName}.`,
+            from: req.user.firstName,
+            photoUrl: req.user.photoUrl
+          });
+        }
         
-        // --- TODO: io.to(toUserId).emit("match") ---
         return res.json({
           success: true,
           message: `🚀 0-Day Match! You and ${toUser.firstName} are now connected.`,
@@ -60,7 +77,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
       }
     }
 
-    // Standard swipe record
+    // Standard swipe record creation
     const connectionRequest = new ConnectionRequest({
       fromUserId,
       toUserId,
@@ -80,7 +97,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
   }
 });
 
-// --- REVIEW ENDPOINT (For manual pending requests) ---
+// --- 2. REVIEW ENDPOINT (Accept/Reject Pending Requests) ---
 requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
@@ -88,22 +105,28 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, r
 
     const allowedStatus = ["accepted", "rejected"];
     if (!allowedStatus.includes(status)) {
-      return res.status(400).json({ success: false, message: "Status must be accepted or rejected." });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Status must be accepted or rejected." 
+      });
     }
 
-    // Use findOneAndUpdate to ensure the operation is Atomic
+    // Use findOneAndUpdate for an Atomic operation
     const connectionRequest = await ConnectionRequest.findOneAndUpdate(
       {
         _id: requestId,
-        toUserId: loggedInUser._id,
-        status: "interested",
+        toUserId: loggedInUser._id, // Ensure only the recipient can review
+        status: "interested",      // Can only review pending requests
       },
       { status: status },
       { new: true, runValidators: true }
     );
 
     if (!connectionRequest) {
-      return res.status(404).json({ success: false, message: "Request invalid or already compiled." });
+      return res.status(404).json({ 
+        success: false, 
+        message: "Request invalid or already compiled." 
+      });
     }
 
     res.json({
