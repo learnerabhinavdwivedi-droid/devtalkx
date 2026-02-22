@@ -5,13 +5,13 @@ const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 
 // Beast Mode: Updated to include all the aesthetic dev data
-const USER_SAFE_DATA = "firstName lastName photoUrl age gender bio skills devRole projectLink lookingFor";
+const USER_SAFE_DATA = "firstName lastName photoUrl age gender bio skills devRole projectLink";
 
 // --- 1. PROFILE VIEW ---
 // Fetches the logged-in user's data attached by userAuth middleware
 userRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
-    const user = req.user; 
+    const user = req.user;
     res.send(user);
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
@@ -24,7 +24,7 @@ userRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
     const ALLOWED_UPDATES = ["firstName", "lastName", "photoUrl", "gender", "age", "bio", "skills", "devRole", "projectLink"];
-    
+
     Object.keys(req.body).forEach((key) => {
       if (ALLOWED_UPDATES.includes(key)) loggedInUser[key] = req.body[key];
     });
@@ -106,7 +106,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       hideUsersFromFeed.add(req.fromUserId.toString());
       hideUsersFromFeed.add(req.toUserId.toString());
     });
-    
+
     hideUsersFromFeed.add(loggedInUser._id.toString());
 
     // Fetch new developers using the $nin (not in) operator

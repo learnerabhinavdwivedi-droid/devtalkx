@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import socket from "./utils/socket"; // Ensure you have a socket config file
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import axios from "axios";
+import socket from "./utils/socket";
 import { addUser } from "./utils/userSlice";
-import NavBar from "./components/NavBar";
+import { BASE_URL } from "./utils/constants";
+import NavBar from "./components/navbar";
 import Feed from "./components/Feed";
 import Login from "./components/Login";
 
@@ -11,49 +13,48 @@ function App() {
   const dispatch = useDispatch();
   const user = useSelector((store) => store.user);
 
-  // 🚀 BEAST MODE: Real-time Match Listener
+  // On mount, verify the JWT cookie and load the user into Redux
+  useEffect(() => {
+    if (!user) {
+      axios
+        .get(`${BASE_URL}/profile/view`, { withCredentials: true })
+        .then((res) => dispatch(addUser(res.data)))
+        .catch(() => {
+          // Not authenticated — user stays null, will be redirected to /login
+        });
+    }
+  }, []);
+
+  // Real-time Match Listener
   useEffect(() => {
     if (user && socket) {
-      // Join a private room unique to this user's ID for targeted alerts
       socket.emit("join_private_room", user._id);
-
-      // Listen for the 'match_alert' emitted by the backend requestRouter
       socket.on("match_alert", (data) => {
-        // You can replace this alert with a professional Toast notification later
-        alert(data.message); 
-        
-        // 💎 Next Step: You could dispatch an action to refresh 
-        // the connections list in Redux here
+        alert(data.message);
       });
     }
-
-    // Cleanup: Remove listener when component unmounts to prevent memory leaks
     return () => {
       if (socket) socket.off("match_alert");
     };
   }, [user]);
 
   return (
-    <div className="bg-slate-950 min-h-screen text-white">
+    <div className="min-h-screen bg-[#020617] text-slate-100">
       <BrowserRouter basename="/">
         <NavBar />
         <Routes>
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
-              user ? (
-                <Feed />
-              ) : (
-                <div className="flex h-[80vh] items-center justify-center">
-                  <h1 className="text-5xl font-bold text-blue-500 animate-pulse">
-                    DEVMATCH ENGINE ACTIVE 🚀
-                  </h1>
-                </div>
-              )
-            } 
+              user ? <Feed /> : <Navigate to="/login" replace />
+            }
           />
-          <Route path="/login" element={<Login />} />
-          {/* Add more routes like /profile and /connections here */}
+          <Route
+            path="/login"
+            element={
+              user ? <Navigate to="/" replace /> : <Login />
+            }
+          />
         </Routes>
       </BrowserRouter>
     </div>
