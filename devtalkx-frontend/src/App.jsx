@@ -25,16 +25,20 @@ function App() {
     }
   }, []);
 
-  // Real-time Match Listener
+  // Real-time Match Listener — connect socket only after user is authenticated
   useEffect(() => {
     if (user && socket) {
+      socket.connect();                          // lazy connect with JWT cookie
       socket.emit("join_private_room", user._id);
       socket.on("match_alert", (data) => {
         alert(data.message);
       });
     }
     return () => {
-      if (socket) socket.off("match_alert");
+      if (socket) {
+        socket.off("match_alert");
+        if (!user) socket.disconnect();          // clean up if user logs out
+      }
     };
   }, [user]);
 

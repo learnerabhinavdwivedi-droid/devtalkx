@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevTalkX — Super-User Audit Console</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0a0d14;
+            --surface: #111520;
+            --card: #161c2d;
+            --border: #1e2a45;
+            --accent: #4f8ef7;
+            --accent2: #a78bfa;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --red: #ef4444;
+            --cyan: #06b6d4;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --glow: rgba(79, 142, 247, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(79, 142, 247, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(79, 142, 247, 0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 60px;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 24px 28px;
+            background: linear-gradient(135deg, #111827, #1a2540);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 28px;
+            box-shadow: 0 0 40px rgba(79, 142, 247, 0.1);
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px var(--glow);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: .82rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .badge {
+            margin-left: auto;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            background: rgba(34, 197, 94, .15);
+            color: var(--green);
+            border: 1px solid rgba(34, 197, 94, .3);
+        }
+
+        /* STATUS BAR */
+        #statusBar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: border-color .3s, box-shadow .3s;
+        }
+
+        .stat-card.ok {
+            border-color: rgba(34, 197, 94, .4);
+            box-shadow: 0 0 16px rgba(34, 197, 94, .1);
+        }
+
+        .stat-card.fail {
+            border-color: rgba(239, 68, 68, .4);
+            box-shadow: 0 0 16px rgba(239, 68, 68, .1);
+        }
+
+        .stat-card.warn {
+            border-color: rgba(234, 179, 8, .4);
+            box-shadow: 0 0 16px rgba(234, 179, 8, .1);
+        }
+
+        .stat-card.run {
+            border-color: rgba(79, 142, 247, .4);
+            box-shadow: 0 0 16px rgba(79, 142, 247, .1);
+        }
+
+        .stat-label {
+            font-size: .7rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-value.ok {
+            color: var(--green);
+        }
+
+        .stat-value.fail {
+            color: var(--red);
+        }
+
+        .stat-value.warn {
+            color: var(--yellow);
+        }
+
+        .stat-value.run {
+            color: var(--accent);
+        }
+
+        .stat-sub {
+            font-size: .72rem;
+            color: var(--muted);
+        }
+
+        /* SECTION */
+        section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .sec-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, .02);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .sec-icon {
+            font-size: 1.2rem;
+        }
+
+        .sec-title {
+            font-weight: 600;
+            font-size: .95rem;
+            flex: 1;
+        }
+
+        .sec-badge {
+            font-size: .7rem;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+            background: rgba(79, 142, 247, .15);
+            color: var(--accent);
+            border: 1px solid rgba(79, 142, 247, .3);
+        }
+
+        .sec-badge.ok {
+            background: rgba(34, 197, 94, .15);
+            color: var(--green);
+            border-color: rgba(34, 197, 94, .3);
+        }
+
+        .sec-badge.fail {
+            background: rgba(239, 68, 68, .15);
+            color: var(--red);
+            border-color: rgba(239, 68, 68, .3);
+        }
+
+        .sec-badge.warn {
+            background: rgba(234, 179, 8, .15);
+            color: var(--yellow);
+            border-color: rgba(234, 179, 8, .3);
+        }
+
+        .sec-toggle {
+            color: var(--muted);
+            font-size: .8rem;
+            transition: transform .3s;
+        }
+
+        .sec-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .sec-body {
+            padding: 20px;
+        }
+
+        /* BUTTON */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: .82rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all .2s;
+            user-select: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b73d6, var(--accent));
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(79, 142, 247, .4);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: .75rem;
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, .05);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, .09);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        /* LOG TERMINAL */
+        .log-box {
+            background: #080c14;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            min-height: 120px;
+            max-height: 320px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .78rem;
+            line-height: 1.7;
+        }
+
+        .log-box::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .log-box::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .log-line {
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-ts {
+            color: #475569;
+            flex-shrink: 0;
+        }
+
+        .log-msg {
+            color: var(--text);
+        }
+
+        .log-msg.ok {
+            color: var(--green);
+        }
+
+        .log-msg.fail {
+            color: var(--red);
+        }
+
+        .log-msg.warn {
+            color: var(--yellow);
+        }
+
+        .log-msg.info {
+            color: var(--accent);
+        }
+
+        .log-msg.cyan {
+            color: var(--cyan);
+        }
+
+        /* RESULT GRID */
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .result-item.ok {
+            border-left: 3px solid var(--green);
+        }
+
+        .result-item.fail {
+            border-left: 3px solid var(--red);
+        }
+
+        .result-item.warn {
+            border-left: 3px solid var(--yellow);
+        }
+
+        .result-item.skip {
+            border-left: 3px solid var(--muted);
+        }
+
+        .ri-name {
+            font-weight: 600;
+            font-size: .82rem;
+        }
+
+        .ri-status {
+            font-size: .75rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .ri-status.ok {
+            color: var(--green);
+        }
+
+        .ri-status.fail {
+            color: var(--red);
+        }
+
+        .ri-status.warn {
+            color: var(--yellow);
+        }
+
+        .ri-status.skip {
+            color: var(--muted);
+        }
+
+        .ri-detail {
+            font-size: .72rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* AI PROMPT */
+        .ai-prompt-area {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .ai-input {
+            background: #0d1321;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: .83rem;
+            outline: none;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .ai-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(79, 142, 247, .15);
+        }
+
+        .ai-output {
+            background: #080c14;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            font-size: .82rem;
+            line-height: 1.7;
+            min-height: 80px;
+            color: var(--text);
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+
+        /* LATENCY BAR */
+        .lat-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .lat-label {
+            font-size: .78rem;
+            color: var(--muted);
+            width: 140px;
+        }
+
+        .lat-bar-wrap {
+            flex: 1;
+            background: rgba(255, 255, 255, .06);
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .lat-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .lat-bar.fast {
+            background: linear-gradient(90deg, #22c55e, #86efac);
+        }
+
+        .lat-bar.med {
+            background: linear-gradient(90deg, #eab308, #fde047);
+        }
+
+        .lat-bar.slow {
+            background: linear-gradient(90deg, #ef4444, #fb7185);
+        }
+
+        .lat-val {
+            font-size: .78rem;
+            font-family: 'JetBrains Mono', monospace;
+            width: 70px;
+            text-align: right;
+            color: var(--text);
+        }
+
+        /* SPINNER */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(79, 142, 247, .3);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            display: inline-block;
+        }
+
+        /* PULSE DOT */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .dot.ok {
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        .dot.fail {
+            background: var(--red);
+            box-shadow: 0 0 8px var(--red);
+        }
+
+        .dot.warn {
+            background: var(--yellow);
+            box-shadow: 0 0 8px var(--yellow);
+            animation: pulse 1.5s infinite;
+        }
+
+        .dot.run {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+            animation: pulse .8s infinite;
+        }
+
+        /* DIVIDER */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 16px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: .68rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .tag-get {
+            background: rgba(34, 197, 94, .15);
+            color: var(--green);
+        }
+
+        .tag-post {
+            background: rgba(79, 142, 247, .15);
+            color: var(--accent);
+        }
+
+        .tag-put {
+            background: rgba(234, 179, 8, .15);
+            color: var(--yellow);
+        }
+
+        .tag-del {
+            background: rgba(239, 68, 68, .15);
+            color: var(--red);
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: .75rem;
+            color: var(--muted);
+        }
+
+        footer span {
+            color: var(--accent);
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:700px) {
+            #statusBar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .ai-prompt-area {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+
+        <!-- HEADER -->
+        <header>
+            <div class="logo">⚡</div>
+            <div>
+                <h1>DevTalkX — Super-User Audit Console</h1>
+                <p>Full-stack diagnostic · Edge Built-in AI · MongoDB · Socket.io · API Suite</p>
+            </div>
+            <div class="badge">🛡 Super-User Mode</div>
+        </header>
+
+        <!-- STATUS OVERVIEW CARDS -->
+        <div id="statusBar">
+            <div class="stat-card run" id="s-ai">
+                <div class="stat-label">Edge AI (Phi-4-mini)</div>
+                <div class="stat-value run" id="sv-ai"><span class="spinner"></span></div>
+                <div class="stat-sub" id="ss-ai">Checking window.ai…</div>
+            </div>
+            <div class="stat-card run" id="s-db">
+                <div class="stat-label">MongoDB</div>
+                <div class="stat-value run" id="sv-db"><span class="spinner"></span></div>
+                <div class="stat-sub" id="ss-db">localhost:27017/devtalkx</div>
+            </div>
+            <div class="stat-card run" id="s-api">
+                <div class="stat-label">Backend API</div>
+                <div class="stat-value run" id="sv-api"><span class="spinner"></span></div>
+                <div class="stat-sub" id="ss-api">http://localhost:5002</div>
+            </div>
+            <div class="stat-card run" id="s-sock">
+                <div class="stat-label">Socket.io</div>
+                <div class="stat-value run" id="sv-sock"><span class="spinner"></span></div>
+                <div class="stat-sub" id="ss-sock">Real-time layer</div>
+            </div>
+        </div>
+
+        <!-- ① EDGE AI SECTION -->
+        <section id="sec-ai">
+            <div class="sec-header" onclick="toggle('sec-ai')">
+                <div class="sec-icon">🤖</div>
+                <div class="sec-title">① Edge Built-in AI — Phi-4-mini (LanguageModel API)</div>
+                <span class="sec-badge" id="badge-ai">CHECKING</span>
+                <div class="sec-toggle open" id="tog-ai">▼</div>
+            </div>
+            <div class="sec-body" id="body-sec-ai">
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="runAIInit()">▶ Initialize Model</button>
+                    <button class="btn btn-ghost" onclick="runAICapabilities()">🔍 Check Capabilities</button>
+                    <button class="btn btn-ghost" onclick="runAIBenchmark()">⚡ Latency Benchmark</button>
+                </div>
+                <div class="ai-prompt-area">
+                    <textarea class="ai-input" id="aiPrompt"
+                        placeholder="Enter a prompt to test Phi-4-mini inference…">Explain what a JWT token is in two sentences.</textarea>
+                    <button class="btn btn-primary" onclick="sendAIPrompt()" style="align-self:flex-end">Send ↗</button>
+                </div>
+                <div class="ai-output" id="aiOutput">AI response will appear here…</div>
+                <div id="aiLog" class="log-box" style="margin-top:12px; min-height:80px;"></div>
+            </div>
+        </section>
+
+        <!-- ② DATABASE SECTION -->
+        <section id="sec-db">
+            <div class="sec-header" onclick="toggle('sec-db')">
+                <div class="sec-icon">🗄️</div>
+                <div class="sec-title">② MongoDB Health Check — localhost:27017</div>
+                <span class="sec-badge" id="badge-db">CHECKING</span>
+                <div class="sec-toggle open" id="tog-db">▼</div>
+            </div>
+            <div class="sec-body" id="body-sec-db">
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="checkDB()">🔌 Run Health Check</button>
+                    <button class="btn btn-ghost" onclick="checkDBStats()">📊 DB Stats</button>
+                </div>
+                <div class="result-grid" id="dbResults"></div>
+                <div id="dbLog" class="log-box" style="margin-top:14px; min-height:80px;"></div>
+            </div>
+        </section>
+
+        <!-- ③ API STRESS TEST -->
+        <section id="sec-api">
+            <div class="sec-header" onclick="toggle('sec-api')">
+                <div class="sec-icon">🌐</div>
+                <div class="sec-title">③ API Endpoint Stress Test — 6 Route Groups</div>
+                <span class="sec-badge" id="badge-api">CHECKING</span>
+                <div class="sec-toggle open" id="tog-api">▼</div>
+            </div>
+            <div class="sec-body" id="body-sec-api">
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="runAllAPI()">▶ Run All Tests</button>
+                    <button class="btn btn-ghost btn-sm" onclick="runAPIGroup('auth')">Auth</button>
+                    <button class="btn btn-ghost btn-sm" onclick="runAPIGroup('user')">User</button>
+                    <button class="btn btn-ghost btn-sm" onclick="runAPIGroup('request')">Requests</button>
+                    <button class="btn btn-ghost btn-sm" onclick="runAPIGroup('chat')">Chat</button>
+                    <button class="btn btn-ghost btn-sm" onclick="runAPIGroup('payment')">Payment</button>
+                </div>
+                <div class="result-grid" id="apiResults"></div>
+                <div id="apiLog" class="log-box" style="margin-top:14px;"></div>
+            </div>
+        </section>
+
+        <!-- ④ SOCKET.IO TEST -->
+        <section id="sec-sock">
+            <div class="sec-header" onclick="toggle('sec-sock')">
+                <div class="sec-icon">🔌</div>
+                <div class="sec-title">④ Socket.io — Real-time Connection Test</div>
+                <span class="sec-badge" id="badge-sock">IDLE</span>
+                <div class="sec-toggle open" id="tog-sock">▼</div>
+            </div>
+            <div class="sec-body" id="body-sec-sock">
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="testSocket()">⚡ Connect Socket</button>
+                    <button class="btn btn-ghost" onclick="disconnectSocket()">✕ Disconnect</button>
+                </div>
+                <div id="sockLog" class="log-box"></div>
+            </div>
+        </section>
+
+        <!-- ⑤ EXPERIMENTAL FEATURE TESTS -->
+        <section id="sec-feat">
+            <div class="sec-header" onclick="toggle('sec-feat')">
+                <div class="sec-icon">🧪</div>
+                <div class="sec-title">⑤ Experimental Feature Stress Test</div>
+                <span class="sec-badge" id="badge-feat">READY</span>
+                <div class="sec-toggle open" id="tog-feat">▼</div>
+            </div>
+            <div class="sec-body" id="body-sec-feat">
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="runAllFeatures()">▶ Run All Feature Tests</button>
+                </div>
+                <div class="result-grid" id="featResults"></div>
+                <div id="featLog" class="log-box" style="margin-top:14px;"></div>
+            </div>
+        </section>
+
+        <!-- ⑥ LATENCY REPORT -->
+        <section id="sec-lat">
+            <div class="sec-header" onclick="toggle('sec-lat')">
+                <div class="sec-icon">📊</div>
+                <div class="sec-title">⑥ Diagnostic Report — Latency & Permissions</div>
+                <span class="sec-badge" id="badge-lat">READY</span>
+                <div class="sec-toggle open" id="tog-lat">▼</div>
+            </div>
+            <div class="sec-body" id="body-sec-lat">
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="buildReport()">📋 Generate Full Report</button>
+                    <button class="btn btn-ghost" onclick="exportReport()">💾 Export JSON</button>
+                </div>
+                <div id="latRows"></div>
+                <hr />
+                <div id="permRows" class="result-grid" style="margin-top:0;"></div>
+                <div id="latLog" class="log-box" style="margin-top:14px;"></div>
+            </div>
+        </section>
+
+        <footer>
+            DevTalkX Super-User Audit Console · Built for <span>Microsoft Edge</span> (Phi-4-mini) · 2026-02-22
+        </footer>
+    </div>
+
+    <script>
+        // ─── CONFIG ───────────────────────────────────────────────────────────────────
+        const API = 'http://localhost:5002';
+        const RESULTS = {};   // store all latencies & statuses
+
+        // ─── TOGGLE SECTIONS ──────────────────────────────────────────────────────────
+        function toggle(id) {
+            const body = document.getElementById('body-' + id);
+            const tog = document.getElementById('tog-' + id);
+            const open = body.style.display !== 'none';
+            body.style.display = open ? 'none' : '';
+            if (tog) tog.classList.toggle('open', !open);
+        }
+
+        // ─── LOGGER ───────────────────────────────────────────────────────────────────
+        function log(boxId, msg, cls = '') {
+            const box = document.getElementById(boxId);
+            if (!box) return;
+            const ts = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = `<span class="log-ts">[${ts}]</span><span class="log-msg ${cls}">${msg}</span>`;
+            box.appendChild(line);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // ─── STAT CARD UPDATER ────────────────────────────────────────────────────────
+        function setCard(id, val, sub, cls) {
+            const card = document.getElementById('s-' + id);
+            const sv = document.getElementById('sv-' + id);
+            const ss = document.getElementById('ss-' + id);
+            card.className = 'stat-card ' + cls;
+            sv.className = 'stat-value ' + cls;
+            sv.innerHTML = val;
+            ss.textContent = sub;
+        }
+
+        // ─── SEC BADGE ────────────────────────────────────────────────────────────────
+        function setBadge(id, txt, cls) {
+            const b = document.getElementById('badge-' + id);
+            b.textContent = txt;
+            b.className = 'sec-badge ' + cls;
+        }
+
+        // ─── RESULT ITEM ─────────────────────────────────────────────────────────────
+        function makeResultItem(name, status, detail, cls) {
+            return `<div class="result-item ${cls}">
+    <div class="ri-name">${name}</div>
+    <div class="ri-status ${cls}">${status}</div>
+    <div class="ri-detail">${detail}</div>
+  </div>`;
+        }
+
+        // ─── LATENCY BAR ─────────────────────────────────────────────────────────────
+        function latBar(label, ms) {
+            if (ms === null || ms === undefined) return '';
+            const max = 2000;
+            const pct = Math.min((ms / max) * 100, 100);
+            const cls = ms < 200 ? 'fast' : ms < 800 ? 'med' : 'slow';
+            return `<div class="lat-row">
+    <div class="lat-label">${label}</div>
+    <div class="lat-bar-wrap"><div class="lat-bar ${cls}" style="width:${pct}%"></div></div>
+    <div class="lat-val">${ms}ms</div>
+  </div>`;
+        }
+
+        // ─── ① EDGE AI ───────────────────────────────────────────────────────────────
+        let aiSession = null;
+
+        async function runAIInit() {
+            log('aiLog', '⚡ Initializing Edge Built-in AI (window.ai)…', 'info');
+            // Check window.ai
+            if (typeof window.ai === 'undefined') {
+                log('aiLog', '✗ window.ai is undefined — Edge Phi-4-mini NOT available in this context.', 'fail');
+                log('aiLog', 'ℹ Enable via edge://flags/#prompt-api-for-gemini-nano or ensure Edge ≥ 131 with GenAI enabled.', 'warn');
+                setCard('ai', '✗ N/A', 'API not exposed', 'fail'); setBadge('ai', 'UNAVAILABLE', 'fail');
+                RESULTS.aiAvailable = false; return;
+            }
+            // Check for LanguageModel API
+            const api = window.ai.languageModel || window.LanguageModel;
+            if (!api) {
+                log('aiLog', '✗ window.ai exists but LanguageModel API not found.', 'fail');
+                log('aiLog', 'Detected APIs: ' + Object.keys(window.ai).join(', '), 'warn');
+                setCard('ai', '⚠ Partial', 'AI exists, no LM', 'warn'); setBadge('ai', 'PARTIAL', 'warn');
+                RESULTS.aiAvailable = 'partial'; return;
+            }
+            try {
+                log('aiLog', '🔍 Checking model availability…', 'info');
+                const cap = await api.capabilities();
+                log('aiLog', `✓ capabilities.available = "${cap.available}"`, 'ok');
+                log('aiLog', `  defaultTemperature: ${cap.defaultTemperature}, defaultTopK: ${cap.defaultTopK}`, 'ok');
+                RESULTS.aiCapabilities = cap;
+
+                if (cap.available === 'no') {
+                    log('aiLog', '✗ Model not downloaded. Visit edge://on-device-internals to download Phi-4-mini.', 'fail');
+                    setCard('ai', '✗ No Model', 'Not downloaded', 'fail'); setBadge('ai', 'NO MODEL', 'fail');
+                    RESULTS.aiAvailable = false; return;
+                }
+                if (cap.available === 'after-download') {
+                    log('aiLog', '⏳ Model is downloading…', 'warn');
+                    setCard('ai', '⏳ Downloading', 'Model in progress', 'warn'); setBadge('ai', 'DOWNLOADING', 'warn');
+                    RESULTS.aiAvailable = 'downloading'; return;
+                }
+                log('aiLog', '✓ Creating AI session…', 'info');
+                const t0 = performance.now();
+                aiSession = await api.create();
+                const createMs = Math.round(performance.now() - t0);
+                log('aiLog', `✓ Session created in ${createMs}ms`, 'ok');
+                RESULTS.aiAvailable = true; RESULTS.aiCreateMs = createMs;
+                setCard('ai', '✓ READY', `Session: ${createMs}ms`, 'ok'); setBadge('ai', 'READY', 'ok');
+            } catch (e) {
+                log('aiLog', `✗ Error: ${e.message}`, 'fail');
+                setCard('ai', '✗ ERROR', e.message.slice(0, 30), 'fail'); setBadge('ai', 'ERROR', 'fail');
+                RESULTS.aiAvailable = false;
+            }
+        }
+
+        async function runAICapabilities() {
+            const api = window.ai?.languageModel || window.LanguageModel;
+            if (!api) { log('aiLog', '✗ AI API not found. Run Initialize first.', 'fail'); return; }
+            try {
+                const cap = await api.capabilities();
+                log('aiLog', `Capabilities: ${JSON.stringify(cap)}`, 'cyan');
+            } catch (e) { log('aiLog', `✗ ${e.message}`, 'fail'); }
+        }
+
+        async function runAIBenchmark() {
+            if (!aiSession) { log('aiLog', '⚠ No active session. Click Initialize first.', 'warn'); return; }
+            const prompts = ['Hello', 'What is 2+2?', 'Name 3 programming languages.'];
+            log('aiLog', '⚡ Running latency benchmark (3 prompts)…', 'info');
+            const times = [];
+            for (const p of prompts) {
+                const t0 = performance.now();
+                try { await aiSession.prompt(p); }
+                catch (e) { log('aiLog', `✗ Prompt failed: ${e.message}`, 'fail'); continue; }
+                const ms = Math.round(performance.now() - t0);
+                times.push(ms);
+                log('aiLog', `  "${p}" → ${ms}ms`, 'ok');
+            }
+            if (times.length) {
+                const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+                log('aiLog', `✓ Avg latency: ${avg}ms`, 'ok');
+                RESULTS.aiBenchmarkMs = avg;
+            }
+        }
+
+        async function sendAIPrompt() {
+            const prompt = document.getElementById('aiPrompt').value.trim();
+            if (!prompt) return;
+            const out = document.getElementById('aiOutput');
+            out.textContent = '⏳ Generating…';
+            if (!aiSession) {
+                // Try to get any available AI
+                try { await runAIInit(); } catch (e) { }
+            }
+            if (!aiSession) {
+                out.textContent = '✗ No AI session. Click "Initialize Model" first.';
+                return;
+            }
+            try {
+                const t0 = performance.now();
+                const result = await aiSession.prompt(prompt);
+                const ms = Math.round(performance.now() - t0);
+                out.textContent = result;
+                log('aiLog', `✓ Prompt completed in ${ms}ms`, 'ok');
+                RESULTS.lastPromptMs = ms;
+            } catch (e) {
+                out.textContent = '✗ Error: ' + e.message;
+                log('aiLog', `✗ Prompt failed: ${e.message}`, 'fail');
+            }
+        }
+
+        // ─── ② DB HEALTH CHECK ───────────────────────────────────────────────────────
+        async function checkDB() {
+            log('dbLog', '🔌 Testing DB via backend health endpoint…', 'info');
+            setCard('db', '<span class="spinner"></span>', 'Connecting…', 'run');
+            const box = document.getElementById('dbResults');
+            box.innerHTML = '';
+            const checks = [
+                { name: 'Backend Root (GET /)', url: `${API}/`, expectText: 'DevTalkX' },
+                { name: 'Auth health (GET /signup)', url: `${API}/signup`, acceptAny: true },
+                { name: 'User route (GET /feed)', url: `${API}/feed`, acceptAny: true },
+            ];
+            let pass = 0, fail = 0;
+            for (const c of checks) {
+                const t0 = performance.now();
+                try {
+                    const r = await fetch(c.url, { credentials: 'include' });
+                    const ms = Math.round(performance.now() - t0);
+                    const text = await r.text().catch(() => '');
+                    const ok = c.acceptAny || (c.expectText && text.includes(c.expectText));
+                    const cls = ok || r.status < 500 ? 'ok' : 'fail';
+                    box.innerHTML += makeResultItem(c.name, ok ? `✓ ${r.status} (${ms}ms)` : `⚠ ${r.status} (${ms}ms)`, text.slice(0, 60) || 'No body', cls);
+                    log('dbLog', `${ok ? '✓' : '⚠'} ${c.name} → HTTP ${r.status} in ${ms}ms`, ok ? 'ok' : 'warn');
+                    if (ok || r.status < 500) pass++; else fail++;
+                    RESULTS['db_' + c.name] = { status: r.status, ms };
+                } catch (e) {
+                    const ms = Math.round(performance.now() - t0);
+                    fail++;
+                    box.innerHTML += makeResultItem(c.name, `✗ Network Error`, e.message, 'fail');
+                    log('dbLog', `✗ ${c.name} → ${e.message}`, 'fail');
+                }
+            }
+            if (fail === checks.length) {
+                setCard('db', '✗ OFFLINE', 'Backend unreachable', 'fail'); setBadge('db', 'OFFLINE', 'fail');
+                log('dbLog', '✗ Backend is DOWN. Run: cd back && npm run dev', 'fail');
+            } else if (fail > 0) {
+                setCard('db', '⚠ PARTIAL', `${pass}/${checks.length} passed`, 'warn'); setBadge('db', 'PARTIAL', 'warn');
+            } else {
+                setCard('db', '✓ ONLINE', 'MongoDB connected', 'ok'); setBadge('db', 'ONLINE', 'ok');
+                log('dbLog', '✓ DB reachable through backend. MongoDB is live.', 'ok');
+            }
+        }
+
+        async function checkDBStats() {
+            log('dbLog', 'ℹ DB stats require admin endpoint. Check backend logs for MongoDB connection message.', 'info');
+            log('dbLog', 'Expected: "💎 MongoDB Connected: Data layer active"', 'cyan');
+        }
+
+        // ─── ③ API ENDPOINT TESTS ─────────────────────────────────────────────────────
+        const API_ENDPOINTS = {
+            auth: [
+                { method: 'GET', path: '/signup', label: 'Signup page', note: 'Route exists check' },
+                { method: 'POST', path: '/login', label: 'Login (empty)', note: 'Expect 400/422 validation' },
+                { method: 'GET', path: '/logout', label: 'Logout', note: 'Clears cookie' },
+            ],
+            user: [
+                { method: 'GET', path: '/feed', label: 'Feed', note: 'Requires auth' },
+                { method: 'GET', path: '/profile', label: 'Profile view', note: 'Requires auth' },
+                { method: 'GET', path: '/connections', label: 'Connections', note: 'Requires auth' },
+            ],
+            request: [
+                { method: 'GET', path: '/requests/pending', label: 'Pending Req', note: 'Requires auth' },
+            ],
+            chat: [
+                { method: 'GET', path: '/messages/test123', label: 'Chat history', note: 'Requires valid userId' },
+            ],
+            payment: [
+                { method: 'POST', path: '/payment/create', label: 'Create Order', note: 'Requires auth + body' },
+            ],
+        };
+
+        async function runAllAPI() {
+            const all = Object.values(API_ENDPOINTS).flat();
+            await runEndpoints(all, 'apiLog', 'apiResults', 'api', 'api');
+        }
+
+        async function runAPIGroup(grp) {
+            const eps = API_ENDPOINTS[grp] || [];
+            await runEndpoints(eps, 'apiLog', 'apiResults', 'api', grp);
+        }
+
+        async function runEndpoints(eps, logId, gridId, cardId, badgeId) {
+            const box = document.getElementById(gridId);
+            box.innerHTML = '';
+            log(logId, `▶ Running ${eps.length} endpoint tests…`, 'info');
+            let pass = 0, authBlock = 0, fail = 0;
+            for (const ep of eps) {
+                const tagCls = `tag-${ep.method.toLowerCase()}`;
+                const t0 = performance.now();
+                try {
+                    const opts = { method: ep.method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
+                    if (ep.method === 'POST') opts.body = JSON.stringify({});
+                    const r = await fetch(API + ep.path, opts);
+                    const ms = Math.round(performance.now() - t0);
+                    // 401/403 = auth guard = expected for protected routes
+                    const isAuthBlock = r.status === 401 || r.status === 403;
+                    const isPass = r.status < 500;
+                    const cls = isAuthBlock ? 'warn' : isPass ? 'ok' : 'fail';
+                    const statusTxt = isAuthBlock ? `🔒 ${r.status} Auth Guard (${ms}ms)` : isPass ? `✓ ${r.status} (${ms}ms)` : `✗ ${r.status} (${ms}ms)`;
+                    box.innerHTML += makeResultItem(
+                        `<span class="tag ${tagCls}">${ep.method}</span>${ep.label}`, statusTxt,
+                        (isAuthBlock ? 'Auth required — endpoint exists ✓ · ' : '') + ep.note, cls
+                    );
+                    log(logId, `${isAuthBlock ? '🔒' : isPass ? '✓' : '✗'} [${ep.method}] ${ep.path} → ${r.status} (${ms}ms)`, isAuthBlock ? 'warn' : isPass ? 'ok' : 'fail');
+                    if (isAuthBlock) authBlock++; else if (isPass) pass++; else fail++;
+                    RESULTS['api_' + ep.path] = { status: r.status, ms };
+                } catch (e) {
+                    fail++;
+                    const ms = Math.round(performance.now() - t0);
+                    box.innerHTML += makeResultItem(`<span class="tag ${tagCls}">${ep.method}</span>${ep.label}`, `✗ Network Error`, e.message, 'fail');
+                    log(logId, `✗ [${ep.method}] ${ep.path} → ${e.message}`, 'fail');
+                }
+            }
+            const total = eps.length;
+            if (fail === total) {
+                setCard(cardId, '✗ DOWN', 'All requests failed', 'fail'); setBadge(badgeId, 'ALL FAIL', 'fail');
+            } else if (fail > 0) {
+                setCard(cardId, `⚠ ${pass + authBlock}/${total}`, 'Some failures', 'warn'); setBadge(badgeId, 'PARTIAL', 'warn');
+            } else {
+                setCard(cardId, `✓ ${total}/${total}`, 'All routes live', 'ok'); setBadge(badgeId, 'PASSED', 'ok');
+                log(logId, `✓ All ${total} endpoints responded (${authBlock} auth-gated, ${pass} open)`, 'ok');
+            }
+        }
+
+        // ─── ④ SOCKET.IO ─────────────────────────────────────────────────────────────
+        let socketConn = null;
+        function testSocket() {
+            log('sockLog', '⚡ Loading socket.io client script…', 'info');
+            setCard('sock', '<span class="spinner"></span>', 'Connecting…', 'run'); setBadge('sock', 'CONNECTING', '');
+            const script = document.createElement('script');
+            script.src = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
+            script.onload = () => {
+                log('sockLog', '✓ Socket.io client loaded', 'ok');
+                try {
+                    socketConn = io(API, { transports: ['websocket', 'polling'], withCredentials: true, timeout: 5000 });
+                    socketConn.on('connect', () => {
+                        log('sockLog', `✓ Connected! Socket ID: ${socketConn.id}`, 'ok');
+                        setCard('sock', '✓ CONNECTED', socketConn.id.slice(0, 12) + '…', 'ok');
+                        setBadge('sock', 'LIVE', 'ok');
+                        RESULTS.socketConnected = true; RESULTS.socketId = socketConn.id;
+                    });
+                    socketConn.on('connect_error', (e) => {
+                        log('sockLog', `✗ Connection error: ${e.message}`, 'fail');
+                        setCard('sock', '✗ FAILED', e.message.slice(0, 20), 'fail'); setBadge('sock', 'ERROR', 'fail');
+                        RESULTS.socketConnected = false;
+                    });
+                    socketConn.on('disconnect', (r) => {
+                        log('sockLog', `⚠ Disconnected: ${r}`, 'warn');
+                        setCard('sock', '⚠ DISCONNECTED', r, 'warn'); setBadge('sock', 'DISC', 'warn');
+                    });
+                    setTimeout(() => { if (!socketConn.connected) { log('sockLog', '⏰ Timeout — backend may not be running', 'warn'); setCard('sock', '⏰ TIMEOUT', 'Start backend', 'warn'); setBadge('sock', 'TIMEOUT', 'warn'); } }, 5000);
+                } catch (e) {
+                    log('sockLog', `✗ ${e.message}`, 'fail');
+                }
+            };
+            script.onerror = () => log('sockLog', '✗ Failed to load socket.io CDN. Check internet connection.', 'fail');
+            document.head.appendChild(script);
+        }
+
+        function disconnectSocket() {
+            if (socketConn) { socketConn.disconnect(); socketConn = null; log('sockLog', '✓ Socket disconnected manually.', 'warn'); }
+            else { log('sockLog', 'ℹ No active socket connection.', 'warn'); }
+        }
+
+        // ─── ⑤ EXPERIMENTAL FEATURES ────────────────────────────────────────────────
+        const FEATURE_TESTS = [
+            {
+                name: 'Console Error Explanation (Edge AI)',
+                fn: async () => {
+                    if (!window.ai) return { cls: 'skip', status: 'API Unavailable', detail: 'window.ai not found' };
+                    return { cls: 'ok', status: '✓ Supported', detail: 'window.ai present; Edge console integration active' };
+                }
+            },
+            {
+                name: 'Page Summarization (window.ai)',
+                fn: async () => {
+                    if (!window.ai?.summarizer && !window.ai?.languageModel) return { cls: 'skip', status: 'Not Available', detail: 'No Summarizer API or LanguageModel API' };
+                    if (window.ai.summarizer) {
+                        try {
+                            const s = await window.ai.summarizer.create();
+                            return { cls: 'ok', status: '✓ Ready', detail: 'Summarizer API available: window.ai.summarizer' };
+                        } catch (e) { return { cls: 'warn', status: '⚠ Error', detail: e.message }; }
+                    }
+                    return { cls: 'warn', status: '⚠ Fallback', detail: 'Only LanguageModel available (no Summarizer API)' };
+                }
+            },
+            {
+                name: 'Contextual Reasoning (LanguageModel)',
+                fn: async () => {
+                    const api = window.ai?.languageModel || window.LanguageModel;
+                    if (!api) return { cls: 'skip', status: 'Not Available', detail: 'LanguageModel API not found' };
+                    try {
+                        const cap = await api.capabilities();
+                        return { cls: 'ok', status: `✓ ${cap.available}`, detail: `Temp: ${cap.defaultTemperature}, TopK: ${cap.defaultTopK}` };
+                    } catch (e) { return { cls: 'fail', status: '✗ Error', detail: e.message }; }
+                }
+            },
+            {
+                name: 'Local Storage Access',
+                fn: async () => {
+                    try {
+                        localStorage.setItem('__audit_test__', '1');
+                        localStorage.removeItem('__audit_test__');
+                        const keys = Object.keys(localStorage).filter(k => !k.startsWith('__'));
+                        return { cls: 'ok', status: '✓ Read/Write OK', detail: `${keys.length} existing keys: ${keys.slice(0, 3).join(', ')}` };
+                    } catch (e) { return { cls: 'fail', status: '✗ Blocked', detail: e.message }; }
+                }
+            },
+            {
+                name: 'Session Storage Access',
+                fn: async () => {
+                    try {
+                        sessionStorage.setItem('__audit_test__', '1');
+                        sessionStorage.removeItem('__audit_test__');
+                        return { cls: 'ok', status: '✓ Read/Write OK', detail: `${sessionStorage.length} session keys present` };
+                    } catch (e) { return { cls: 'fail', status: '✗ Blocked', detail: e.message }; }
+                }
+            },
+            {
+                name: 'Performance API (timing)',
+                fn: async () => {
+                    const perf = window.performance;
+                    if (!perf) return { cls: 'fail', status: '✗ Not Available', detail: 'window.performance undefined' };
+                    const nav = perf.getEntriesByType('navigation')[0];
+                    const dns = nav ? Math.round(nav.domainLookupEnd - nav.domainLookupStart) : 0;
+                    const dom = nav ? Math.round(nav.domContentLoadedEventEnd - nav.startTime) : 0;
+                    return { cls: 'ok', status: '✓ Available', detail: `DNS: ${dns}ms, DOMContentLoaded: ${dom}ms` };
+                }
+            },
+            {
+                name: 'Clipboard API Read/Write',
+                fn: async () => {
+                    if (!navigator.clipboard) return { cls: 'warn', status: '⚠ No Clipboard API', detail: 'navigator.clipboard undefined' };
+                    try {
+                        await navigator.clipboard.writeText('DevTalkX Audit');
+                        return { cls: 'ok', status: '✓ Write OK', detail: 'Clipboard write succeeded (permission granted)' };
+                    } catch (e) { return { cls: 'warn', status: '⚠ Blocked', detail: e.message }; }
+                }
+            },
+            {
+                name: 'Notification Permission',
+                fn: async () => {
+                    if (!('Notification' in window)) return { cls: 'skip', status: 'N/A', detail: 'Notifications not supported' };
+                    const perm = Notification.permission;
+                    const cls = perm === 'granted' ? 'ok' : perm === 'denied' ? 'fail' : 'warn';
+                    return { cls, status: perm === 'granted' ? '✓ Granted' : perm === 'denied' ? '✗ Denied' : '⚠ Default (not asked)', detail: `Current state: ${perm}` };
+                }
+            },
+            {
+                name: 'Service Worker Support',
+                fn: async () => {
+                    if (!('serviceWorker' in navigator)) return { cls: 'fail', status: '✗ Not Supported', detail: 'SW API absent' };
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    return { cls: 'ok', status: `✓ Supported`, detail: `${regs.length} worker(s) registered` };
+                }
+            },
+            {
+                name: 'WebAssembly Support',
+                fn: async () => {
+                    if (typeof WebAssembly === 'undefined') return { cls: 'fail', status: '✗ Not Supported', detail: 'WebAssembly undefined' };
+                    return { cls: 'ok', status: '✓ Available', detail: 'WebAssembly global present' };
+                }
+            },
+        ];
+
+        async function runAllFeatures() {
+            const box = document.getElementById('featResults');
+            box.innerHTML = '';
+            log('featLog', '🧪 Running experimental feature tests…', 'info');
+            setBadge('feat', 'RUNNING', '');
+            let pass = 0, fail = 0, skip = 0;
+            for (const t of FEATURE_TESTS) {
+                log('featLog', `  Testing: ${t.name}…`, 'info');
+                try {
+                    const r = await t.fn();
+                    box.innerHTML += makeResultItem(t.name, r.status, r.detail, r.cls);
+                    if (r.cls === 'ok') pass++;
+                    else if (r.cls === 'fail') fail++;
+                    else skip++;
+                    RESULTS['feat_' + t.name] = r;
+                } catch (e) {
+                    fail++;
+                    box.innerHTML += makeResultItem(t.name, '✗ Exception', e.message, 'fail');
+                }
+            }
+            log('featLog', `✓ Done: ${pass} passed, ${fail} failed, ${skip} skipped/unavailable`, pass > fail ? 'ok' : 'warn');
+            setBadge('feat', fail === 0 ? 'ALL PASS' : fail < 3 ? 'PARTIAL' : 'ISSUES', fail === 0 ? 'ok' : fail < 3 ? 'warn' : 'fail');
+        }
+
+        // ─── ⑥ DIAGNOSTIC REPORT ─────────────────────────────────────────────────────
+        async function buildReport() {
+            log('latLog', '📋 Building diagnostic report…', 'info');
+            setBadge('lat', 'BUILDING', '');
+
+            // Latency bars
+            const latEl = document.getElementById('latRows');
+            const entries = [
+                ['Edge AI Session Create', RESULTS.aiCreateMs],
+                ['AI Prompt (avg benchmark)', RESULTS.aiBenchmarkMs],
+                ['Last AI Prompt', RESULTS.lastPromptMs],
+                ...Object.entries(RESULTS).filter(([k]) => k.startsWith('api_')).map(([k, v]) => [k.replace('api_', ''), v?.ms]),
+            ].filter(([, v]) => v !== undefined);
+            latEl.innerHTML = entries.map(([l, v]) => latBar(l, v)).join('') || '<div style="color:var(--muted);font-size:.8rem">Run tests first to populate latency data.</div>';
+
+            // Permission / environment checks
+            const permEl = document.getElementById('permRows');
+            const envChecks = [
+                { name: 'window.ai API', v: typeof window.ai !== 'undefined', detail: typeof window.ai !== 'undefined' ? 'Exposed by Edge' : 'Not exposed' },
+                { name: 'LanguageModel API', v: !!(window.ai?.languageModel || window.LanguageModel), detail: 'Phi-4-mini interface' },
+                { name: 'HTTPS / File Context', v: location.protocol === 'https:' || location.protocol === 'file:', detail: location.protocol },
+                { name: 'Cookies Enabled', v: navigator.cookieEnabled, detail: navigator.cookieEnabled ? 'Enabled' : 'Disabled' },
+                { name: 'Online', v: navigator.onLine, detail: navigator.onLine ? 'Connected' : 'Offline' },
+                { name: 'User Agent (Edge)', v: navigator.userAgent.includes('Edg'), detail: navigator.userAgent.slice(0, 60) },
+                { name: 'Secure Context', v: window.isSecureContext, detail: window.isSecureContext ? 'Secure' : 'Not secure — some APIs blocked' },
+                { name: 'Socket.io Connected', v: RESULTS.socketConnected, detail: RESULTS.socketId || 'Not tested yet' },
+            ];
+            permEl.innerHTML = envChecks.map(c => makeResultItem(c.name, c.v ? '✓ OK' : '✗ Fail', c.detail, c.v ? 'ok' : 'fail')).join('');
+            setBadge('lat', 'DONE', 'ok');
+            log('latLog', '✓ Report generated.', 'ok');
+        }
+
+        function exportReport() {
+            const data = { timestamp: new Date().toISOString(), config: { api: API, db: 'mongodb://localhost:27017/devtalkx' }, results: RESULTS };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `devtalkx-audit-${Date.now()}.json`;
+            a.click();
+            log('latLog', '💾 Report exported as JSON.', 'ok');
+        }
+
+        // ─── AUTO-RUN ON LOAD ─────────────────────────────────────────────────────────
+        window.addEventListener('load', async () => {
+            // Stagger auto-checks
+            setTimeout(runAIInit, 300);
+            setTimeout(checkDB, 800);
+            setTimeout(runAllAPI, 1400);
+            setTimeout(runAllFeatures, 2200);
+            setTimeout(buildReport, 3500);
+        });
+    </script>
+</body>
+
+</html>

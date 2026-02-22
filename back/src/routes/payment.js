@@ -66,30 +66,25 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
     }
     console.log("Valid Webhook Signature");
 
-    // Udpate my payment Status in DB
-    const paymentDetails = req.body.payload.payment.entity;
+    // Only upgrade user on a successful capture — ignore refunds, failures, etc.
+    if (req.body.event === "payment.captured") {
+      const paymentDetails = req.body.payload.payment.entity;
 
-    const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
-    payment.status = paymentDetails.status;
-    await payment.save();
-    console.log("Payment saved");
+      const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
+      if (!payment) return res.status(404).json({ msg: "Payment record not found" });
+      payment.status = paymentDetails.status;
+      await payment.save();
+      console.log("Payment saved");
 
-    const user = await User.findOne({ _id: payment.userId });
-    user.isPremium = true;
-    user.membershipType = payment.notes.membershipType;
-    console.log("User saved");
-
-    await user.save();
-
-    // Update the user as premium
-
-    // if (req.body.event == "payment.captured") {
-    // }
-    // if (req.body.event == "payment.failed") {
-    // }
+      const user = await User.findOne({ _id: payment.userId });
+      if (!user) return res.status(404).json({ msg: "User not found" });
+      user.isPremium = true;
+      user.membershipType = payment.notes.membershipType;
+      console.log("User saved");
+      await user.save();
+    }
 
     // return success response to razorpay
-
     return res.status(200).json({ msg: "Webhook received successfully" });
   } catch (err) {
     return res.status(500).json({ msg: err.message });
