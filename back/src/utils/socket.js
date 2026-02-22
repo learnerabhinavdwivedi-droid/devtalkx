@@ -18,45 +18,49 @@ const initializeSocket = (server) => {
       methods: ["GET", "POST"]
     },
     // Beast Mode: Terminate ghost connections faster
-    pingTimeout: 60000, 
+    pingTimeout: 60000,
   });
 
   io.on("connection", (socket) => {
-    // 1. Better Room Joining with logging
+    // 1. Private room for match notifications (frontend joins with user's own _id)
+    socket.on("join_private_room", (userId) => {
+      if (!userId) return;
+      socket.join(userId.toString());
+      console.log(`🔔 User ${userId} joined private notification room`);
+    });
+
+    // 2. Chat room joining
     socket.on("joinChat", ({ firstName, userId, targetUserId }) => {
       if (!userId || !targetUserId) return;
-      
+
       const roomId = getSecretRoomId(userId, targetUserId);
       socket.join(roomId);
       console.log(`✨ ${firstName} secured in Room: ${roomId.substring(0, 8)}...`);
     });
 
-    // 2. High-Performance Messaging
+    // 3. High-Performance Messaging
     socket.on("sendMessage", async ({ firstName, lastName, userId, targetUserId, text }) => {
       try {
         const roomId = getSecretRoomId(userId, targetUserId);
 
-        // BEAST MODE SECURITY: Validation
         // Only save and emit if text actually exists
         if (!text || text.trim() === "") return;
 
-        // Optimized DB Update: Using $push directly is faster than fetching & saving the whole doc
-        const chat = await Chat.findOneAndUpdate(
+        // Optimized DB Update
+        await Chat.findOneAndUpdate(
           { participants: { $all: [userId, targetUserId] } },
-          { 
-            $push: { messages: { senderId: userId, text } } 
+          {
+            $push: { messages: { senderId: userId, text } }
           },
-          { upsert: true, new: true } // Creates the chat if it doesn't exist
+          { upsert: true, new: true }
         );
 
-        // TARGETED EMIT: Use .to(roomId) but consider .broadcast to save sender bandwidth
-        // We emit to the room so the target receives it instantly
-        io.to(roomId).emit("messageReceived", { 
-          firstName, 
-          lastName, 
+        io.to(roomId).emit("messageReceived", {
+          firstName,
+          lastName,
           text,
           senderId: userId,
-          createdAt: new Date() 
+          createdAt: new Date()
         });
 
       } catch (err) {
@@ -65,18 +69,20 @@ const initializeSocket = (server) => {
       }
     });
 
-    // 3. CLEANUP: The Memory Guard
+    // 4. Cleanup
     socket.on("disconnecting", () => {
-      // Log rooms being left for debugging
       const rooms = Array.from(socket.rooms);
       console.log(`Cleanup: Socket ${socket.id} leaving ${rooms.length} rooms`);
     });
 
     socket.on("disconnect", () => {
-      socket.removeAllListeners(); 
+      socket.removeAllListeners();
       console.log("🚀 User disconnected & listeners wiped.");
     });
   });
+
+  // CRITICAL FIX: Return io so app.set("socketio", io) works correctly
+  return io;
 };
 
 module.exports = initializeSocket;

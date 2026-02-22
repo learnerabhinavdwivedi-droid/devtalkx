@@ -4,8 +4,7 @@ import { useSelector } from 'react-redux';
 import { Post } from '../types';
 import { CreatePost } from './CreatePost';
 import { PostCard } from './PostCard';
-
-const BASE_URL = 'http://localhost:5002';
+import { BASE_URL } from '../utils/constants';
 
 interface Developer {
   _id: string;
@@ -22,6 +21,7 @@ interface Developer {
 type Tab = 'devmatch' | 'devtalk';
 
 export default function Feed() {
+  const user = useSelector((store: any) => store.user);
   const [tab, setTab] = useState<Tab>('devtalk');
 
   // DevMatch state
@@ -122,8 +122,8 @@ export default function Feed() {
               key={t}
               onClick={() => setTab(t)}
               className={`flex-1 py-4 text-sm font-bold uppercase tracking-widest transition-all border-b-2 ${tab === t
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-300'
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-slate-500 hover:text-slate-300'
                 }`}
             >
               {t === 'devtalk' ? '💬 DevTalk Feed' : '🚀 DevMatch'}
@@ -142,7 +142,7 @@ export default function Feed() {
               </h1>
               <p className="text-slate-500 mt-1">Share knowledge, connect with devs.</p>
             </div>
-            <CreatePost onAddPost={handleAddPost} />
+            <CreatePost onAddPost={handleAddPost} author={user?.firstName || 'dev'} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
               {posts.length > 0 ? (
                 posts.map((post) => (
