@@ -23,8 +23,10 @@ const server = http.createServer(app);
 app.set("trust proxy", 1);
 
 // 3. Global Middleware
+const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, "") : "http://localhost:5173";
+
 const corsOptions = {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: clientUrl,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true // Required for JWT cookie persistence
 };

@@ -13,7 +13,20 @@ function App() {
   const dispatch = useDispatch();
   const user = useSelector((store) => store.user);
 
-  // On mount, verify the JWT cookie and load the user into Redux
+  // Diagnostic Interceptor: Catch and log network errors globally
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (!error.response) {
+          console.error("🌐 Network Error: Cannot reach backend at", BASE_URL);
+          console.error("Check if backend is awake and CLIENT_URL/VITE_API_URL are matched.");
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, []);
   useEffect(() => {
     if (!user) {
       axios

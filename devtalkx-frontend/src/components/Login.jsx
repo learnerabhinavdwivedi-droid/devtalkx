@@ -47,6 +47,10 @@ const Login = () => {
         navigate("/");
       }
     } catch (err) {
+      console.error("🔴 Connection Failed!");
+      console.error("Trying to reach BASE_URL:", BASE_URL);
+      console.error("Full Error Object:", err);
+
       const data = err?.response?.data;
       const msg = data
         ? typeof data === "string"
