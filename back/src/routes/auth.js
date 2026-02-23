@@ -27,14 +27,16 @@ authRouter.post("/signup", async (req, res, next) => {
 
 // --- 2. LOGIN ROUTE ---
 // 🚀 Implements secure JWT cookie logic for session management
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/login", async (req, res, next) => {
   try {
     const { emailId, password } = req.body;
 
     // 🔍 Find user by email
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
-      throw new Error("Invalid credentials");
+      const error = new Error("Invalid credentials");
+      error.statusCode = 401;
+      throw error;
     }
 
     // 🛡️ Validate password using schema method
@@ -54,26 +56,39 @@ authRouter.post("/login", async (req, res) => {
         sameSite: isProduction ? "none" : "lax",
       });
 
-      res.send(user); // Send user object back to frontend store
+      res.json({
+        success: true,
+        data: user,
+        message: "Login successful!"
+      });
     } else {
-      throw new Error("Invalid credentials");
+      const error = new Error("Invalid credentials");
+      error.statusCode = 401;
+      throw error;
     }
   } catch (err) {
-    res.status(400).send("ERROR : " + err.message);
+    next(err);
   }
 });
 
 // --- 3. LOGOUT ROUTE ---
 // 🚀 Destroys the session by expiring the cookie immediately
-authRouter.post("/logout", async (req, res) => {
-  const isProduction = process.env.NODE_ENV === "production";
-  res.cookie("token", null, {
-    expires: new Date(Date.now()),
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-  });
-  res.send("Logout Successful!! 🔌");
+authRouter.post("/logout", async (req, res, next) => {
+  try {
+    const isProduction = process.env.NODE_ENV === "production";
+    res.cookie("token", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+    });
+    res.json({
+      success: true,
+      message: "Logout Successful!! 🔌"
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = authRouter;

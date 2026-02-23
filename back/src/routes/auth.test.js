@@ -88,8 +88,8 @@ describe("POST /login", () => {
             password: "Whatever1@",
         });
 
-        expect(res.status).toBe(400);
-        expect(res.text).toMatch(/Invalid credentials/);
+        expect(res.status).toBe(401);
+        expect(res.body.message).toMatch(/Invalid credentials/);
     });
 
     // Test 6: Wrong password
@@ -104,8 +104,8 @@ describe("POST /login", () => {
             password: "WrongPass1@",
         });
 
-        expect(res.status).toBe(400);
-        expect(res.text).toMatch(/Invalid credentials/);
+        expect(res.status).toBe(401);
+        expect(res.body.message).toMatch(/Invalid credentials/);
     });
 });
 
@@ -117,7 +117,7 @@ describe("POST /logout", () => {
         const res = await request(app).post("/logout");
 
         expect(res.status).toBe(200);
-        expect(res.text).toMatch(/Logout Successful/);
+        expect(res.body.message).toMatch(/Logout Successful/);
         // Verify cookie is expired
         const cookie = res.headers["set-cookie"]?.[0] || "";
         expect(cookie).toContain("token=");

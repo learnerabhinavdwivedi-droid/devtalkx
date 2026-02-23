@@ -11,9 +11,9 @@ const getSecretRoomId = (userId, targetUserId) => {
     .digest("hex");
 };
 
-const initializeSocket = (server) => {
+const initializeSocket = (server, corsOptions) => {
   const io = socket(server, {
-    cors: {
+    cors: corsOptions || {
       origin: process.env.CLIENT_URL || "http://localhost:5173",
       methods: ["GET", "POST"],
       credentials: true
