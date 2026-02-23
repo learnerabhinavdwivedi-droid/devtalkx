@@ -3,11 +3,11 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
-const cookieParser = require('cookie-parser'); 
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 
 // Import Routers
-const authRouter = require("./src/routes/auth"); 
+const authRouter = require("./src/routes/auth");
 const userRouter = require("./src/routes/user");
 const requestRouter = require("./src/routes/request");
 const chatRouter = require("./src/routes/chat");
@@ -20,9 +20,11 @@ const initializeSocket = require("./src/utils/socket");
 const app = express();
 const server = http.createServer(app);
 
+app.set("trust proxy", 1);
+
 // 3. Global Middleware
 const corsOptions = {
-    origin: process.env.CLIENT_URL || "http://localhost:5173", 
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true // Required for JWT cookie persistence
 };
@@ -36,15 +38,15 @@ app.get("/", (req, res) => {
     res.status(200).send("🚀 DevTalkX Backend is live!");
 });
 
-app.use("/", authRouter); 
-app.use("/", userRouter); 
+app.use("/", authRouter);
+app.use("/", userRouter);
 app.use("/", requestRouter);
 app.use("/", chatRouter);
 app.use("/", paymentRouter);
 
 // 5. Initialize Socket.io (handles all real-time logic via src/utils/socket.js)
 const io = initializeSocket(server);
-app.set("socketio", io); 
+app.set("socketio", io);
 
 // 6. Global Error Handling
 app.use((err, req, res, next) => {
