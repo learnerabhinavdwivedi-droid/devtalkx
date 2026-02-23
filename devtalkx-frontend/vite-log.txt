@@ -1,0 +1,207 @@
+﻿
+> devtalkx-frontend@0.0.0 dev
+> vite
+
+
+  [32m[1mVITE[22m v7.3.1[39m  [2mready in [0m[1m508[22m[2m[0m ms[22m
+
+  [32mΓ₧£[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32mΓ₧£[39m  [1mNetwork[22m: [36mhttp://192.168.1.3:[1m5173[22m/[39m
+[2m[32m  Γ₧£[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+node.exe : [2m6:33:28 
+pm[22m [31m[1m[vite]
+[22m[39m 
+[31mInternal server 
+error: Failed to load 
+PostCSS config 
+(searchPath: C:/Users/l
+earn/devtalkx/devtalkx-
+frontend): [Error] 
+Loading PostCSS Plugin 
+failed: Cannot find 
+module '../lightningcss
+.win32-x64-msvc.node'
+At line:1 char:1
++ & 
+"E:\nodejs/node.exe" "C
+:\Users\learn\AppData\R
+oaming\npm/node_modul 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: ([2m6:33:28 p   
+ m...-x64-msvc.nod    
+e':String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+Require stack:
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\lightningcss
+\node\index.js
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\@tailwindcss
+\node\dist\index.js
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\@tailwindcss
+\postcss\dist\index.js
+
+(@C:\Users\learn\devtal
+kx\devtalkx-frontend\po
+stcss.config.js)
+Error: Loading PostCSS 
+Plugin failed: Cannot 
+find module '../lightni
+ngcss.win32-x64-msvc.no
+de'
+Require stack:
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\lightningcss
+\node\index.js
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\@tailwindcss
+\node\dist\index.js
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\@tailwindcss
+\postcss\dist\index.js
+
+(@C:\Users\learn\devtal
+kx\devtalkx-frontend\po
+stcss.config.js)
+    at load (file:///C:
+/Users/learn/devtalkx/d
+evtalkx-frontend/node_m
+odules/vite/dist/node/c
+hunks/config.js:7660:10
+)
+    at async 
+Promise.all (index 0)
+    at async plugins (f
+ile:///C:/Users/learn/d
+evtalkx/devtalkx-fronte
+nd/node_modules/vite/di
+st/node/chunks/config.j
+s:7682:11)
+    at async 
+processResult (file:///
+C:/Users/learn/devtalkx
+/devtalkx-frontend/node
+_modules/vite/dist/node
+/chunks/config.js:7721:
+13)[39m
+  Plugin: 
+[35mvite:css[39m
+  File: [36mC:/Users/l
+earn/devtalkx/devtalkx-
+frontend/src/index.css
+[39m
+[2m6:33:28 pm[22m [3
+1m[1m[vite][22m[39m 
+[31m[2m(client)[22m
+[39m Pre-transform 
+error: Failed to load 
+PostCSS config 
+(searchPath: C:/Users/l
+earn/devtalkx/devtalkx-
+frontend): [Error] 
+Loading PostCSS Plugin 
+failed: Cannot find 
+module '../lightningcss
+.win32-x64-msvc.node'
+Require stack:
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\lightningcss
+\node\index.js
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\@tailwindcss
+\node\dist\index.js
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\@tailwindcss
+\postcss\dist\index.js
+
+(@C:\Users\learn\devtal
+kx\devtalkx-frontend\po
+stcss.config.js)
+Error: Loading PostCSS 
+Plugin failed: Cannot 
+find module '../lightni
+ngcss.win32-x64-msvc.no
+de'
+Require stack:
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\lightningcss
+\node\index.js
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\@tailwindcss
+\node\dist\index.js
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\@tailwindcss
+\postcss\dist\index.js
+
+(@C:\Users\learn\devtal
+kx\devtalkx-frontend\po
+stcss.config.js)
+    at load (file:///C:
+/Users/learn/devtalkx/d
+evtalkx-frontend/node_m
+odules/vite/dist/node/c
+hunks/config.js:7660:10
+)
+    at async 
+Promise.all (index 0)
+    at async plugins (f
+ile:///C:/Users/learn/d
+evtalkx/devtalkx-fronte
+nd/node_modules/vite/di
+st/node/chunks/config.j
+s:7682:11)
+    at async 
+processResult (file:///
+C:/Users/learn/devtalkx
+/devtalkx-frontend/node
+_modules/vite/dist/node
+/chunks/config.js:7721:
+13)
+  Plugin: 
+[35mvite:css[39m
+  File: [36mC:/Users/l
+earn/devtalkx/devtalkx-
+frontend/src/index.css
+[39m
+[2m6:35:10 pm[22m [36m[1m[vite][22m[39m [32mvite.config.js changed, restarting server...[39m
+[31mfailed to load 
+config from C:\Users\le
+arn\devtalkx\devtalkx-f
+rontend\vite.config.js
+[39m
+[2m6:35:11 pm[22m [3
+1m[1m[vite][22m[39m 
+Cannot find module '../
+lightningcss.win32-x64-
+msvc.node'
+Require stack:
+- C:\Users\learn\devtal
+kx\devtalkx-frontend\no
+de_modules\lightningcss
+\node\index.js
+[2m6:35:11 pm[22m [3
+1m[1m[vite][22m[39m 
+server restart failed

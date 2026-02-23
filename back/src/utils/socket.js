@@ -15,7 +15,8 @@ const initializeSocket = (server) => {
   const io = socket(server, {
     cors: {
       origin: process.env.CLIENT_URL || "http://localhost:5173",
-      methods: ["GET", "POST"]
+      methods: ["GET", "POST"],
+      credentials: true
     },
     // Beast Mode: Terminate ghost connections faster
     pingTimeout: 60000,

@@ -47,11 +47,12 @@ const Login = () => {
         navigate("/");
       }
     } catch (err) {
-      const msg = err?.response?.data
-        ? typeof err.response.data === "string"
-          ? err.response.data
-          : JSON.stringify(err.response.data)
-        : "Something went wrong. Please try again.";
+      const data = err?.response?.data;
+      const msg = data
+        ? typeof data === "string"
+          ? data
+          : data.message || JSON.stringify(data)
+        : "Cannot reach the server. Make sure the backend is running.";
       setError(msg.replace("ERROR : ", "").replace("ERROR: ", ""));
     } finally {
       setLoading(false);
