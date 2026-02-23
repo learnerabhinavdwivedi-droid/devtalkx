@@ -25,10 +25,24 @@ app.set("trust proxy", 1);
 // 3. Global Middleware
 const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, "") : "http://localhost:5173";
 
+const allowedOrigins = [
+    clientUrl,
+    "http://localhost:5173",
+    "http://localhost:5002"
+];
+
 const corsOptions = {
-    origin: clientUrl,
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || origin.includes("netlify.app")) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    credentials: true // Required for JWT cookie persistence
+    credentials: true
 };
 
 app.use(cors(corsOptions));
@@ -36,6 +50,14 @@ app.use(express.json()); // Parses JSON bodies so you can read req.body
 app.use(cookieParser()); // Parses cookies before they reach the routes
 
 // 4. Routes
+app.get("/health", (req, res) => {
+    res.json({
+        status: "alive",
+        environment: process.env.NODE_ENV || "development",
+        db: mongoose.connection.readyState === 1 ? "connected" : "disconnected"
+    });
+});
+
 app.get("/", (req, res) => {
     res.status(200).send("🚀 DevTalkX Backend is live!");
 });
