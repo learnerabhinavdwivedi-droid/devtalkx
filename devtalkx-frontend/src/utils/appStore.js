@@ -1,9 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./userSlice";
+import connectionReducer from "./connectionSlice";
+import chatReducer from "./chatSlice";
 
 const appStore = configureStore({
   reducer: {
-    user: userReducer, // 🚀 Registers your user slice in the main engine
+    user: userReducer,
+    connections: connectionReducer,
+    chat: chatReducer,
   },
 });
 

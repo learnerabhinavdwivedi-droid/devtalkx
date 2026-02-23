@@ -8,6 +8,7 @@ import { BASE_URL } from "./utils/constants";
 import NavBar from "./components/navbar";
 import Feed from "./components/Feed";
 import Login from "./components/Login";
+import Chat from "./components/Chat";
 
 function App() {
   const dispatch = useDispatch();
@@ -64,6 +65,12 @@ function App() {
             path="/"
             element={
               user ? <Feed /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              user ? <Chat /> : <Navigate to="/login" replace />
             }
           />
           <Route

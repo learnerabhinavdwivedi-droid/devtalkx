@@ -32,8 +32,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       validate(value) {
-        if (!validator.isStrongPassword(value)) {
-          throw new Error("Password must be stronger (Min 8 chars, 1 Uppercase, 1 Symbol)");
+        if (value.length < 4) {
+          throw new Error("Password must be at least 4 characters long");
         }
       },
     },
@@ -75,11 +75,11 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
-    devRole: { 
-      type: String, 
-      enum: ["Frontend", "Backend", "Fullstack", "DevOps", "AI/ML"] 
+    devRole: {
+      type: String,
+      enum: ["Frontend", "Backend", "Fullstack", "DevOps", "AI/ML"]
     },
-    projectLink: { 
+    projectLink: {
       type: String,
       validate(value) {
         if (value && !validator.isURL(value)) {
@@ -101,7 +101,7 @@ userSchema.pre("save", async function () {
 
   // Hash the password with a salt round of 10
   user.password = await bcrypt.hash(user.password, 10);
-  
+
   // No next() call is needed for async functions in modern Mongoose
 });
 
@@ -111,8 +111,8 @@ userSchema.pre("save", async function () {
 userSchema.methods.getJWT = async function () {
   const user = this;
   const token = await jwt.sign(
-    { _id: user._id }, 
-    process.env.JWT_SECRET || "DEV@Tinder$790", 
+    { _id: user._id },
+    process.env.JWT_SECRET || "DEV@Tinder$790",
     { expiresIn: "7d" }
   );
   return token;
