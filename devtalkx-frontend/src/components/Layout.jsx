@@ -41,10 +41,10 @@ export default function Layout({ children }) {
         { id: 'feed', path: '/', label: 'DevTalk Feed', icon: MessageCircle },
         { id: 'match', path: '/match', label: 'DevMatch', icon: Rocket },
         { id: 'connections', path: '/connections', label: 'Connections', icon: Bookmark },
-        { id: 'explore', path: '#', label: 'Explore', icon: LayoutIcon },
+        { id: 'explore', path: '/match', label: 'Explore', icon: LayoutIcon },
         { id: 'community', path: '/community', label: 'Community', icon: Users },
         { id: 'chat', path: '/chat', label: 'Chat', icon: MessageSquare },
-        { id: 'myposts', path: '#', label: 'My Posts', icon: FileText },
+        { id: 'myposts', path: '/myposts', label: 'My Posts', icon: FileText },
     ];
 
     const activeTab = location.pathname.includes('/chat') ? 'chat'
@@ -82,7 +82,7 @@ export default function Layout({ children }) {
                         />
                     </div>
 
-                    <button className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors relative">
+                    <button onClick={() => navigate("/notifications")} className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors relative">
                         <Bell size={20} />
                         <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full border-2 border-[#111827]"></span>
                     </button>

@@ -12,6 +12,8 @@ import Chat from "./components/Chat";
 import Community from "./components/Community";
 import Profile from "./components/Profile";
 import Connections from "./components/Connections";
+import Notifications from "./components/Notifications";
+import MyPosts from "./components/MyPosts";
 
 function App() {
   const dispatch = useDispatch();
@@ -63,6 +65,8 @@ function App() {
           <Route path="/community" element={user ? <Community /> : <Navigate to="/login" replace />} />
           <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" replace />} />
           <Route path="/connections" element={user ? <Connections /> : <Navigate to="/login" replace />} />
+          <Route path="/notifications" element={user ? <Notifications /> : <Navigate to="/login" replace />} />
+          <Route path="/myposts" element={user ? <MyPosts /> : <Navigate to="/login" replace />} />
           <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
         </Routes>
       </Layout>
