@@ -37,7 +37,8 @@ const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/,
 const allowedOrigins = [
     clientUrl,
     "http://localhost:5173",
-    "http://localhost:5002"
+    "http://localhost:5002",
+    "https://devtalkx-frontend.vercel.app"
 ];
 
 const corsOptions = {
@@ -46,7 +47,8 @@ const corsOptions = {
         if (!origin) return callback(null, true);
 
         const isAllowed = allowedOrigins.includes(origin) ||
-            (origin.endsWith("netlify.app") && origin.includes("devtalkx"));
+            (origin.endsWith("netlify.app") && origin.includes("devtalkx")) ||
+            (origin.endsWith("vercel.app") && origin.includes("devtalkx"));
 
         if (isAllowed) {
             callback(null, true);
