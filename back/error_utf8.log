@@ -1,0 +1,83 @@
+﻿node : ΓÜá∩╕Å  
+Razorpay keys not 
+found. Payment routes 
+will be disabled. Set 
+RAZORPAY_KEY_ID and 
+RAZORPAY_KEY_SECRET in 
+your .env file to 
+enable payments.
+At line:1 char:1
++ node app.js 2> 
+error.log
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (ΓÜá∩╕Å  Razor   
+ pa...nable payment    
+s.:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+node:internal/modules/c
+js/loader:1424
+  throw err;
+  ^
+
+Error: Cannot find 
+module 'multer'
+Require stack:
+- C:\Users\learn\devtal
+kx\back\src\routes\uplo
+ad.js
+- C:\Users\learn\devtal
+kx\back\app.js
+    at Module._resolveF
+ilename (node:internal/
+modules/cjs/loader:1421
+:15)
+    at 
+defaultResolveImpl (nod
+e:internal/modules/cjs/
+loader:1059:19)
+    at 
+resolveForCJSWithHooks 
+(node:internal/modules/
+cjs/loader:1064:22)
+    at Module._load (no
+de:internal/modules/cjs
+/loader:1227:37)
+    at TracingChannel.t
+raceSync (node:diagnost
+ics_channel:328:14)
+    at wrapModuleLoad (
+node:internal/modules/c
+js/loader:245:24)
+    at Module.require (
+node:internal/modules/c
+js/loader:1504:12)
+    at require (node:in
+ternal/modules/helpers:
+152:16)
+    at 
+Object.<anonymous> (C:\
+Users\learn\devtalkx\ba
+ck\src\routes\upload.js
+:2:16)
+    at Module._compile 
+(node:internal/modules/
+cjs/loader:1761:14) {
+  code: 
+'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\learn\\
+devtalkx\\back\\src\\ro
+utes\\upload.js',
+    'C:\\Users\\learn\\
+devtalkx\\back\\app.js'
+  ]
+}
+
+Node.js v24.12.0

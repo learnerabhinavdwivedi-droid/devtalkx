@@ -77,13 +77,7 @@ app.get("/", (req, res) => {
     res.status(200).send("🚀 DevTalkX Backend is live!");
 });
 
-const authRouter = require("./src/routes/auth");
-const userRouter = require("./src/routes/user");
-const requestRouter = require("./src/routes/request");
-const chatRouter = require("./src/routes/chat");
-const paymentRouter = require("./src/routes/payment");
 const uploadRouter = require("./src/routes/upload");
-
 app.use("/", authRouter);
 app.use("/", userRouter);
 app.use("/", requestRouter);

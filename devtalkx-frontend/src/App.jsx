@@ -10,6 +10,8 @@ import Feed from "./components/Feed";
 import Login from "./components/Login";
 import Chat from "./components/Chat";
 import Community from "./components/Community";
+import Profile from "./components/Profile";
+import Connections from "./components/Connections";
 
 function App() {
   const dispatch = useDispatch();
@@ -59,6 +61,8 @@ function App() {
           <Route path="/match" element={user ? <Feed /> : <Navigate to="/login" replace />} />
           <Route path="/chat" element={user ? <Chat /> : <Navigate to="/login" replace />} />
           <Route path="/community" element={user ? <Community /> : <Navigate to="/login" replace />} />
+          <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" replace />} />
+          <Route path="/connections" element={user ? <Connections /> : <Navigate to="/login" replace />} />
           <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
         </Routes>
       </Layout>

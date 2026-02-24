@@ -37,12 +37,18 @@ const NavBar = () => {
         {user ? (
           <>
             <button
+              onClick={() => navigate("/connections")}
+              className="text-sm font-semibold text-slate-300 hover:text-white transition-colors"
+            >
+              Connections
+            </button>
+            <button
               onClick={() => navigate("/chat")}
               className="text-sm font-semibold text-slate-300 hover:text-white transition-colors"
             >
               Chat
             </button>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/profile")}>
               <img
                 src={user.photoUrl || "https://avatar.iran.liara.run/public/coding"}
                 alt="profile"
