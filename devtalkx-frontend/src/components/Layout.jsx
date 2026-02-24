@@ -159,8 +159,18 @@ export default function Layout({ children }) {
                                 <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 px-3">
                                     Settings
                                 </div>
-                                <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all duration-200">
+                                <button
+                                    onClick={() => {
+                                        navigate('/profile');
+                                        setIsMobileMenuOpen(false);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all duration-200"
+                                >
                                     <Settings size={18} />
+                                    My Profile
+                                </button>
+                                <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all duration-200">
+                                    <FileText size={18} />
                                     Preferences
                                 </button>
                             </div>
