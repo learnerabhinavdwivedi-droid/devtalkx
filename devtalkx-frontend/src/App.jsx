@@ -13,6 +13,7 @@ import Community from "./components/Community";
 import Profile from "./components/Profile";
 import Connections from "./components/Connections";
 import Notifications from "./components/Notifications";
+import Explore from "./components/Explore";
 import MyPosts from "./components/MyPosts";
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
           <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" replace />} />
           <Route path="/connections" element={user ? <Connections /> : <Navigate to="/login" replace />} />
           <Route path="/notifications" element={user ? <Notifications /> : <Navigate to="/login" replace />} />
+          <Route path="/explore" element={user ? <Explore /> : <Navigate to="/login" replace />} />
           <Route path="/myposts" element={user ? <MyPosts /> : <Navigate to="/login" replace />} />
           <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
         </Routes>

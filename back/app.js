@@ -14,6 +14,7 @@ const userRouter = require("./src/routes/user");
 const requestRouter = require("./src/routes/request");
 const chatRouter = require("./src/routes/chat");
 const paymentRouter = require("./src/routes/payment");
+const postRouter = require("./src/routes/post");
 
 // Import Socket Initializer
 const initializeSocket = require("./src/utils/socket");
@@ -84,6 +85,7 @@ app.use("/", requestRouter);
 app.use("/", chatRouter);
 app.use("/", paymentRouter);
 app.use("/", uploadRouter);
+app.use("/", postRouter);
 
 // 5. Initialize Socket.io
 const io = initializeSocket(server, corsOptions); // Pass same CORS options

@@ -41,7 +41,7 @@ export default function Layout({ children }) {
         { id: 'feed', path: '/', label: 'DevTalk Feed', icon: MessageCircle },
         { id: 'match', path: '/match', label: 'DevMatch', icon: Rocket },
         { id: 'connections', path: '/connections', label: 'Connections', icon: Bookmark },
-        { id: 'explore', path: '/match', label: 'Explore', icon: LayoutIcon },
+        { id: 'explore', path: '/explore', label: 'Explore', icon: LayoutIcon },
         { id: 'community', path: '/community', label: 'Community', icon: Users },
         { id: 'chat', path: '/chat', label: 'Chat', icon: MessageSquare },
         { id: 'myposts', path: '/myposts', label: 'My Posts', icon: FileText },
@@ -49,9 +49,11 @@ export default function Layout({ children }) {
 
     const activeTab = location.pathname.includes('/chat') ? 'chat'
         : location.pathname.includes('/match') ? 'match'
-            : location.pathname.includes('/connections') ? 'connections'
-                : location.pathname.includes('/community') ? 'community'
-                    : 'feed';
+            : location.pathname.includes('/explore') ? 'explore'
+                : location.pathname.includes('/myposts') ? 'myposts'
+                    : location.pathname.includes('/connections') ? 'connections'
+                        : location.pathname.includes('/community') ? 'community'
+                            : 'feed';
 
     return (
         <div className="min-h-screen bg-[#0b1120] text-slate-200 font-sans flex flex-col">
