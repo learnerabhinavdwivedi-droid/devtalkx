@@ -40,17 +40,18 @@ export default function Layout({ children }) {
     const navItems = [
         { id: 'feed', path: '/', label: 'DevTalk Feed', icon: MessageCircle },
         { id: 'match', path: '/match', label: 'DevMatch', icon: Rocket },
+        { id: 'connections', path: '/connections', label: 'Connections', icon: Bookmark },
         { id: 'explore', path: '#', label: 'Explore', icon: LayoutIcon },
         { id: 'community', path: '/community', label: 'Community', icon: Users },
         { id: 'chat', path: '/chat', label: 'Chat', icon: MessageSquare },
         { id: 'myposts', path: '#', label: 'My Posts', icon: FileText },
-        { id: 'bookmarks', path: '#', label: 'Bookmarks', icon: Bookmark },
     ];
 
     const activeTab = location.pathname.includes('/chat') ? 'chat'
         : location.pathname.includes('/match') ? 'match'
-            : location.pathname.includes('/community') ? 'community'
-                : 'feed';
+            : location.pathname.includes('/connections') ? 'connections'
+                : location.pathname.includes('/community') ? 'community'
+                    : 'feed';
 
     return (
         <div className="min-h-screen bg-[#0b1120] text-slate-200 font-sans flex flex-col">
@@ -89,7 +90,7 @@ export default function Layout({ children }) {
                     <div className="flex items-center gap-3 pl-2 md:pl-4 border-l border-slate-800">
                         {user ? (
                             <>
-                                <div className="hidden sm:flex items-center gap-3 cursor-pointer">
+                                <div className="hidden sm:flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate("/profile")} title="Edit Profile">
                                     <img
                                         src={user.photoUrl || "https://avatar.iran.liara.run/public/coding"}
                                         alt="Profile"
