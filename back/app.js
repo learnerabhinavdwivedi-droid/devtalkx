@@ -25,8 +25,11 @@ const server = http.createServer(app);
 app.set("trust proxy", 1);
 
 // 3. Global Middleware
+const path = require('path');
+
 app.use(helmet()); // Security headers
 app.use(morgan('dev')); // Request logging
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploaded files statically
 
 const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, "") : "http://localhost:5173";
 
@@ -74,11 +77,19 @@ app.get("/", (req, res) => {
     res.status(200).send("🚀 DevTalkX Backend is live!");
 });
 
+const authRouter = require("./src/routes/auth");
+const userRouter = require("./src/routes/user");
+const requestRouter = require("./src/routes/request");
+const chatRouter = require("./src/routes/chat");
+const paymentRouter = require("./src/routes/payment");
+const uploadRouter = require("./src/routes/upload");
+
 app.use("/", authRouter);
 app.use("/", userRouter);
 app.use("/", requestRouter);
 app.use("/", chatRouter);
 app.use("/", paymentRouter);
+app.use("/", uploadRouter);
 
 // 5. Initialize Socket.io
 const io = initializeSocket(server, corsOptions); // Pass same CORS options

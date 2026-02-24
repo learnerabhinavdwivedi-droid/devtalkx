@@ -23,36 +23,50 @@ export const CreatePost = ({ onAddPost, author }: { onAddPost: (post: any) => vo
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-10 p-6 bg-slate-900/80 border border-slate-800 rounded-2xl shadow-2xl">
-      <h2 className="text-xl font-bold text-white mb-4">Share a DevTalk</h2>
-      <div className="space-y-4">
-        <input
-          type="text"
-          placeholder="Post Title..."
-          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-all"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <textarea
-          placeholder="What's on your mind?"
-          rows={4}
-          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-all"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Tags (comma separated: react, ai, tech)"
-          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-all"
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-        />
-        <button
-          type="submit"
-          className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-blue-900/20"
-        >
-          Publish Post
-        </button>
+    <form onSubmit={handleSubmit} className="bg-[#111827] rounded-xl border border-slate-800 shadow-xl overflow-hidden mb-8">
+      <div className="p-5 sm:p-6 border-b border-slate-800">
+        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <span className="w-1.5 h-6 bg-blue-500 rounded-full inline-block"></span>
+          Share a DevTalk
+        </h2>
+      </div>
+
+      <div className="p-5 sm:p-6 space-y-4 bg-[#111827]">
+        <div>
+          <input
+            type="text"
+            placeholder="Post Title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full bg-[#0b1120] border border-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
+          />
+        </div>
+
+        <div>
+          <textarea
+            placeholder="What's on your mind?"
+            rows={5}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="w-full bg-[#0b1120] border border-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all resize-y shadow-inner"
+          ></textarea>
+        </div>
+
+        <div>
+          <input
+            type="text"
+            placeholder="Tags (comma separated: react, ai, tech)"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            className="w-full bg-[#0b1120] border border-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
+          />
+        </div>
+
+        <div className="pt-2">
+          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-lg shadow-lg shadow-blue-600/20 transition-all duration-200 active:scale-[0.98]">
+            Publish Post
+          </button>
+        </div>
       </div>
     </form>
   );

@@ -36,6 +36,12 @@ const NavBar = () => {
       <div className="flex items-center gap-4">
         {user ? (
           <>
+            <button
+              onClick={() => navigate("/chat")}
+              className="text-sm font-semibold text-slate-300 hover:text-white transition-colors"
+            >
+              Chat
+            </button>
             <div className="flex items-center gap-3">
               <img
                 src={user.photoUrl || "https://avatar.iran.liara.run/public/coding"}

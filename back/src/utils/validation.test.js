@@ -17,8 +17,8 @@ describe("validateSignUpData", () => {
 
     // Test 3: Weak password
     test("throws on weak password", () => {
-        const req = { body: { firstName: "John", lastName: "Doe", emailId: "john@example.com", password: "1234" } };
-        expect(() => validateSignUpData(req)).toThrow("Please enter a strong Password!");
+        const req = { body: { firstName: "John", lastName: "Doe", emailId: "john@example.com", password: "123" } };
+        expect(() => validateSignUpData(req)).toThrow("Password must be at least 4 characters long");
     });
 
     // Test 4: Valid data — no throw

@@ -39,15 +39,13 @@ const initializeSocket = (server, corsOptions) => {
       console.log(`✨ ${firstName} secured in Room: ${roomId.substring(0, 8)}...`);
     });
 
-    // 3. High-Performance Messaging
+    // 3. High-Performance Messaging (Private)
     socket.on("sendMessage", async ({ firstName, lastName, userId, targetUserId, text }) => {
       try {
         const roomId = getSecretRoomId(userId, targetUserId);
 
-        // Only save and emit if text actually exists
         if (!text || text.trim() === "") return;
 
-        // Optimized DB Update
         await Chat.findOneAndUpdate(
           { participants: { $all: [userId, targetUserId] } },
           {
@@ -69,6 +67,52 @@ const initializeSocket = (server, corsOptions) => {
         socket.emit("error", { message: "Message could not be sent" });
       }
     });
+
+    // --- COMMUNITY GLOBAL CHAT ---
+    socket.on("join_community", ({ firstName, userId }) => {
+      if (!userId) return;
+      socket.join("community");
+      console.log(`🌍 ${firstName || 'User'} joined Global Community Chat`);
+    });
+
+    socket.on("send_community_message", async ({ firstName, lastName, userId, photoUrl, text, messageType, fileUrl, fileName, fileMimeType, gifUrl }) => {
+      try {
+        const { CommunityMessage } = require("../models/communityMessage");
+
+        // Save to DB
+        const newMsg = new CommunityMessage({
+          senderId: userId,
+          text,
+          messageType: messageType || "text",
+          fileUrl,
+          fileName,
+          fileMimeType,
+          gifUrl
+        });
+        await newMsg.save();
+
+        // Broadcast to everyone in 'community' room
+        io.to("community").emit("community_message_received", {
+          _id: newMsg._id,
+          firstName,
+          lastName,
+          photoUrl,
+          text,
+          messageType: messageType || "text",
+          fileUrl,
+          fileName,
+          fileMimeType,
+          gifUrl,
+          senderId: userId,
+          createdAt: newMsg.createdAt
+        });
+
+      } catch (err) {
+        console.error("❌ Community Message Error:", err.message);
+        socket.emit("error", { message: "Global message could not be sent" });
+      }
+    });
+
 
     // 4. Cleanup
     socket.on("disconnecting", () => {

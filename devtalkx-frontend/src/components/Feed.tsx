@@ -22,7 +22,8 @@ type Tab = 'devmatch' | 'devtalk';
 
 export default function Feed() {
   const user = useSelector((store: any) => store.user);
-  const [tab, setTab] = useState<Tab>('devtalk');
+  const location = window.location.pathname;
+  const tab: Tab = location.includes('match') ? 'devmatch' : 'devtalk';
 
   // DevMatch state
   const [developers, setDevelopers] = useState<Developer[]>([]);
@@ -113,37 +114,18 @@ export default function Feed() {
   const currentDev = developers[currentIndex];
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-[#020617] text-slate-200">
-      {/* Tab Bar */}
-      <div className="sticky top-[64px] z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
-        <div className="max-w-5xl mx-auto flex">
-          {(['devtalk', 'devmatch'] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`flex-1 py-4 text-sm font-bold uppercase tracking-widest transition-all border-b-2 ${tab === t
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-500 hover:text-slate-300'
-                }`}
-            >
-              {t === 'devtalk' ? '💬 DevTalk Feed' : '🚀 DevMatch'}
-            </button>
-          ))}
-        </div>
-      </div>
+    <div className="bg-[#0b1120] text-slate-200 w-full">
 
-      <div className="max-w-5xl mx-auto p-4 md:p-8">
+      <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* ── DevTalk Tab ── */}
         {tab === 'devtalk' && (
           <div>
             <div className="mb-8">
-              <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
-                DevTalkX Feed
-              </h1>
-              <p className="text-slate-500 mt-1">Share knowledge, connect with devs.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">DevTalkX Feed</h1>
+              <p className="text-slate-400">Share knowledge, connect with devs.</p>
             </div>
             <CreatePost onAddPost={handleAddPost} author={user?.firstName || 'dev'} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div className="flex flex-col gap-6 mt-8">
               {posts.length > 0 ? (
                 posts.map((post) => (
                   <PostCard
